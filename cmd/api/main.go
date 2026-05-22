@@ -63,6 +63,11 @@ func main() {
 	// BLACKOUT_ENABLED flips on. Issue #9 registers the first real route.
 	forecastMux := http.NewServeMux()
 	forecastMux.HandleFunc("GET /v1/forecast/presidential", handlers.NewPresidentialForecast(forecasts))
+	// Per ADR-007 staging, congress (v1.5) and municipal (v2) return 404
+	// with a structured body the Android client (#44) reads to hide the
+	// corresponding tabs. Both inherit blackout precedence from the mux.
+	forecastMux.HandleFunc("GET /v1/forecast/congress", handlers.NewCongressForecast())
+	forecastMux.HandleFunc("GET /v1/forecast/municipal/{municipality_id}", handlers.NewMunicipalForecast())
 	mux.Handle("/v1/forecast/", middleware.Blackout(forecastMux))
 
 	srv := &http.Server{

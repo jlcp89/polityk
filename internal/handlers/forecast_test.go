@@ -175,3 +175,160 @@ func TestPresidentialForecast_BlackoutMiddlewareWins(t *testing.T) {
 		}
 	})
 }
+
+// TestCongressForecast_Returns404 pins the exact body the Android client
+// (#44) reads to hide the congress tab. The body shape is contract — any
+// change here cascades to the app.
+func TestCongressForecast_Returns404(t *testing.T) {
+	t.Parallel()
+
+	req := httptest.NewRequest(http.MethodGet, "/v1/forecast/congress", nil)
+	rec := httptest.NewRecorder()
+	handlers.NewCongressForecast().ServeHTTP(rec, req)
+
+	if got, want := rec.Code, http.StatusNotFound; got != want {
+		t.Fatalf("status: got %d want %d (body=%q)", got, want, rec.Body.String())
+	}
+	ct := rec.Header().Get("Content-Type")
+	if !strings.HasPrefix(ct, "application/json") {
+		t.Fatalf("content-type: got %q want application/json prefix", ct)
+	}
+	var body map[string]string
+	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
+		t.Fatalf("decode body: %v (raw=%q)", err, rec.Body.String())
+	}
+	if got, want := body["error"], "race_type_not_available"; got != want {
+		t.Errorf("error field: got %q want %q", got, want)
+	}
+	if got, want := body["race_type"], "congress"; got != want {
+		t.Errorf("race_type field: got %q want %q", got, want)
+	}
+	if got, want := body["available_in"], "v1.5"; got != want {
+		t.Errorf("available_in field: got %q want %q", got, want)
+	}
+}
+
+// TestMunicipalForecast_Returns404 pins the v2 staging contract. The
+// `{municipality_id}` path segment is captured by the router but ignored
+// by the handler — every value yields the same 404 body.
+func TestMunicipalForecast_Returns404(t *testing.T) {
+	t.Parallel()
+
+	req := httptest.NewRequest(http.MethodGet, "/v1/forecast/municipal/0", nil)
+	rec := httptest.NewRecorder()
+	handlers.NewMunicipalForecast().ServeHTTP(rec, req)
+
+	if got, want := rec.Code, http.StatusNotFound; got != want {
+		t.Fatalf("status: got %d want %d (body=%q)", got, want, rec.Body.String())
+	}
+	ct := rec.Header().Get("Content-Type")
+	if !strings.HasPrefix(ct, "application/json") {
+		t.Fatalf("content-type: got %q want application/json prefix", ct)
+	}
+	var body map[string]string
+	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
+		t.Fatalf("decode body: %v (raw=%q)", err, rec.Body.String())
+	}
+	if got, want := body["error"], "race_type_not_available"; got != want {
+		t.Errorf("error field: got %q want %q", got, want)
+	}
+	if got, want := body["race_type"], "municipal"; got != want {
+		t.Errorf("race_type field: got %q want %q", got, want)
+	}
+	if got, want := body["available_in"], "v2"; got != want {
+		t.Errorf("available_in field: got %q want %q", got, want)
+	}
+}
+
+// TestMunicipalForecast_MunicipalityIDIgnored mounts the full router so
+// the `{municipality_id}` path segment is captured by Go's 1.22 router,
+// then asserts the handler returns the same 404 body regardless of the
+// captured value — including a non-numeric value, since the handler
+// never parses the segment.
+func TestMunicipalForecast_MunicipalityIDIgnored(t *testing.T) {
+	t.Parallel()
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /v1/forecast/municipal/{municipality_id}", handlers.NewMunicipalForecast())
+
+	cases := []string{"0", "1", "101001", "abc-not-a-number", "999999999999"}
+	for _, id := range cases {
+		t.Run("id="+id, func(t *testing.T) {
+			t.Parallel()
+			req := httptest.NewRequest(http.MethodGet, "/v1/forecast/municipal/"+id, nil)
+			rec := httptest.NewRecorder()
+			mux.ServeHTTP(rec, req)
+			if got, want := rec.Code, http.StatusNotFound; got != want {
+				t.Fatalf("status: got %d want %d (body=%q)", got, want, rec.Body.String())
+			}
+			if !bytes.Contains(rec.Body.Bytes(), []byte(`"race_type":"municipal"`)) {
+				t.Fatalf("body missing race_type=municipal: %q", rec.Body.String())
+			}
+			if !bytes.Contains(rec.Body.Bytes(), []byte(`"available_in":"v2"`)) {
+				t.Fatalf("body missing available_in=v2: %q", rec.Body.String())
+			}
+		})
+	}
+}
+
+// TestCongressAndMunicipal_BlackoutMiddlewareWins mirrors the production
+// wiring (cmd/api/main.go): both routes mount on forecastMux which is
+// wrapped by middleware.Blackout. When the flag is on, the middleware
+// returns 503 BEFORE the 404 handler runs — the race_type body must NOT
+// leak.
+func TestCongressAndMunicipal_BlackoutMiddlewareWins(t *testing.T) {
+	// No t.Parallel(): t.Setenv mutates process-wide state.
+	forecastMux := http.NewServeMux()
+	forecastMux.HandleFunc("GET /v1/forecast/congress", handlers.NewCongressForecast())
+	forecastMux.HandleFunc("GET /v1/forecast/municipal/{municipality_id}", handlers.NewMunicipalForecast())
+	root := http.NewServeMux()
+	root.Handle("/v1/forecast/", middleware.Blackout(forecastMux))
+
+	paths := []string{
+		"/v1/forecast/congress",
+		"/v1/forecast/municipal/0",
+		"/v1/forecast/municipal/101001",
+	}
+
+	t.Run("blackout_off_returns_404", func(t *testing.T) {
+		t.Setenv("BLACKOUT_ENABLED", "false")
+		for _, p := range paths {
+			req := httptest.NewRequest(http.MethodGet, p, nil)
+			rec := httptest.NewRecorder()
+			root.ServeHTTP(rec, req)
+			if got, want := rec.Code, http.StatusNotFound; got != want {
+				t.Fatalf("path=%s status: got %d want %d (body=%q)", p, got, want, rec.Body.String())
+			}
+			if !bytes.Contains(rec.Body.Bytes(), []byte(`"race_type_not_available"`)) {
+				t.Fatalf("path=%s body missing race_type_not_available: %q", p, rec.Body.String())
+			}
+		}
+	})
+
+	t.Run("blackout_on_returns_503_and_does_not_leak_race_type", func(t *testing.T) {
+		t.Setenv("BLACKOUT_ENABLED", "true")
+		for _, p := range paths {
+			req := httptest.NewRequest(http.MethodGet, p, nil)
+			rec := httptest.NewRecorder()
+			root.ServeHTTP(rec, req)
+			if got, want := rec.Code, http.StatusServiceUnavailable; got != want {
+				t.Fatalf("path=%s status: got %d want %d (body=%q)", p, got, want, rec.Body.String())
+			}
+			var body map[string]string
+			if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
+				t.Fatalf("path=%s decode body: %v", p, err)
+			}
+			if body["error"] != "blackout" {
+				t.Fatalf("path=%s error field: got %q want %q", p, body["error"], "blackout")
+			}
+			// Staging metadata must NOT leak under blackout — the
+			// middleware short-circuit owns the response.
+			if bytes.Contains(rec.Body.Bytes(), []byte("race_type_not_available")) {
+				t.Fatalf("path=%s blackout response leaked staging body: %q", p, rec.Body.String())
+			}
+			if bytes.Contains(rec.Body.Bytes(), []byte("available_in")) {
+				t.Fatalf("path=%s blackout response leaked staging body: %q", p, rec.Body.String())
+			}
+		}
+	})
+}
