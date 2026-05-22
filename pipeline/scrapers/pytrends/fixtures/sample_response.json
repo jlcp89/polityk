@@ -1,0 +1,62 @@
+{
+  "_comment": "Recorded normalised pytrends interest_over_time() responses for Guatemala (geo='GT'). Each record mirrors one DataFrame column after the scraper flattens it. Used by the fixture-driven smoke test in pipeline/tests/test_pytrends_scraper.py -- no live pytrends calls.",
+  "responses": [
+    {
+      "query": "Sandra Torres",
+      "geo": "GT",
+      "interest_over_time": [
+        {"date": "2026-02-22", "value": 31},
+        {"date": "2026-03-01", "value": 35},
+        {"date": "2026-03-08", "value": 42},
+        {"date": "2026-03-15", "value": 38},
+        {"date": "2026-03-22", "value": 41},
+        {"date": "2026-03-29", "value": 46},
+        {"date": "2026-04-05", "value": 52},
+        {"date": "2026-04-12", "value": 49},
+        {"date": "2026-04-19", "value": 55},
+        {"date": "2026-04-26", "value": 61},
+        {"date": "2026-05-03", "value": 58},
+        {"date": "2026-05-10", "value": 64},
+        {"date": "2026-05-17", "value": 72}
+      ]
+    },
+    {
+      "query": "Bernardo Arevalo",
+      "geo": "GT",
+      "interest_over_time": [
+        {"date": "2026-02-22", "value": 88},
+        {"date": "2026-03-01", "value": 84},
+        {"date": "2026-03-08", "value": 79},
+        {"date": "2026-03-15", "value": 81},
+        {"date": "2026-03-22", "value": 76},
+        {"date": "2026-03-29", "value": 73},
+        {"date": "2026-04-05", "value": 78},
+        {"date": "2026-04-12", "value": 82},
+        {"date": "2026-04-19", "value": 77},
+        {"date": "2026-04-26", "value": 80},
+        {"date": "2026-05-03", "value": 85},
+        {"date": "2026-05-10", "value": 88},
+        {"date": "2026-05-17", "value": 91}
+      ]
+    },
+    {
+      "query": "Movimiento Semilla",
+      "geo": "GT",
+      "interest_over_time": [
+        {"date": "2026-02-22", "value": 22},
+        {"date": "2026-03-01", "value": 18},
+        {"date": "2026-03-08", "value": 25},
+        {"date": "2026-03-15", "value": 28},
+        {"date": "2026-03-22", "value": 31},
+        {"date": "2026-03-29", "value": 27},
+        {"date": "2026-04-05", "value": 30},
+        {"date": "2026-04-12", "value": 33},
+        {"date": "2026-04-19", "value": 29},
+        {"date": "2026-04-26", "value": 35},
+        {"date": "2026-05-03", "value": 38},
+        {"date": "2026-05-10", "value": 41},
+        {"date": "2026-05-17", "value": 44}
+      ]
+    }
+  ]
+}
