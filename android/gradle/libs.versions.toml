@@ -4,6 +4,7 @@ kotlin = "2.0.21"
 ksp = "2.0.21-1.0.28"
 hilt = "2.51.1"
 hiltNavigationCompose = "1.2.0"
+navigationCompose = "2.8.4"
 coreKtx = "1.13.1"
 activityCompose = "1.9.3"
 lifecycle = "2.8.7"
@@ -41,6 +42,8 @@ compose-foundation = { module = "androidx.compose.foundation:foundation" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
 hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 
 retrofit-core = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 retrofit-converter-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "retrofit" }

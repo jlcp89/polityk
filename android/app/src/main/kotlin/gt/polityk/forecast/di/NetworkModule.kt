@@ -8,6 +8,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import gt.polityk.forecast.BuildConfig
+import gt.polityk.forecast.data.api.MethodologyPayload
 import gt.polityk.forecast.data.api.PolitykApi
 import gt.polityk.forecast.data.api.PresidentialPayload
 import okhttp3.OkHttpClient
@@ -66,6 +67,10 @@ object NetworkModule {
     @Provides
     @Singleton
     fun providePresidentialPayloadAdapter(moshi: Moshi): JsonAdapter<PresidentialPayload> = moshi.adapter(PresidentialPayload::class.java)
+
+    @Provides
+    @Singleton
+    fun provideMethodologyPayloadAdapter(moshi: Moshi): JsonAdapter<MethodologyPayload> = moshi.adapter(MethodologyPayload::class.java)
 
     @Provides
     @Singleton

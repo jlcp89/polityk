@@ -75,6 +75,65 @@ class PolitykApiTest {
         }
 
     @Test
+    fun `methodology payload parses issue 13 fixture`() =
+        runTest {
+            server.enqueue(
+                MockResponse()
+                    .setResponseCode(200)
+                    .setHeader("Content-Type", "application/json; charset=utf-8")
+                    .setBody(Fixtures.methodologyJson()),
+            )
+
+            val payload = api.getMethodology()
+
+            assertEquals("0.1.0", payload.modelVersion)
+            assertEquals("2026-05-22T06:00:00Z", payload.generatedAt)
+            assertEquals(
+                "https://polityk.gt/methodology#presidential-0.1.0",
+                payload.longFormUrl,
+            )
+            assertEquals(false, payload.presidential.sentimentAsModelledInput)
+            assertEquals(6, payload.presidential.fundamentalsFeatures.size)
+            assertEquals(3, payload.presidential.pollsterBiasPriors.size)
+
+            val prodatos = payload.presidential.pollsterBiasPriors.first { it.pollster == "ProDatos" }
+            assertEquals(0.063, prodatos.historicalBiasMean, 1e-9)
+            assertEquals(0.04, prodatos.historicalBiasSd, 1e-9)
+            assertEquals(8, prodatos.sampleCountUsed)
+
+            val thresholds = payload.presidential.calibrationThresholds
+            assertEquals(0.80, thresholds?.c180PctCoverage ?: 0.0, 1e-9)
+            assertEquals(0.95, thresholds?.c295PctCoverage ?: 0.0, 1e-9)
+            assertEquals(5.0, thresholds?.c3Top3MaePp ?: 0.0, 1e-9)
+
+            val requested = server.takeRequest()
+            assertEquals("/v1/methodology", requested.path)
+        }
+
+    @Test
+    fun `methodology payload parses minimum required fields`() =
+        runTest {
+            val minimal =
+                """
+                {
+                  "model_version": "0.1.0",
+                  "generated_at": "2026-05-22T06:00:00Z",
+                  "presidential": {
+                    "sentiment_as_modelled_input": true
+                  },
+                  "long_form_url": "https://polityk.gt/m"
+                }
+                """.trimIndent()
+            server.enqueue(MockResponse().setResponseCode(200).setBody(minimal))
+
+            val payload = api.getMethodology()
+
+            assertEquals(0, payload.presidential.pollsterBiasPriors.size)
+            assertEquals(0, payload.presidential.fundamentalsFeatures.size)
+            assertNull(payload.presidential.calibrationThresholds)
+        }
+
+    @Test
     fun `omitting optional fields still parses`() =
         runTest {
             // intervention array + cache_invalid_until are both optional
