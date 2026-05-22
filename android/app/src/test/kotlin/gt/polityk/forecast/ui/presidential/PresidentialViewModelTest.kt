@@ -3,6 +3,7 @@
 package gt.polityk.forecast.ui.presidential
 
 import app.cash.turbine.test
+import gt.polityk.forecast.data.api.BlackoutException
 import gt.polityk.forecast.data.api.PresidentialPayload
 import gt.polityk.forecast.data.repo.CachedForecast
 import gt.polityk.forecast.data.repo.PresidentialRepository
@@ -26,6 +27,7 @@ import java.time.ZoneOffset
 
 class PresidentialViewModelTest {
     private val dispatcher = StandardTestDispatcher()
+    private val fixedClock = Clock.fixed(Instant.parse("2026-05-23T22:00:00Z"), ZoneOffset.UTC)
 
     // Fixture's generated_at == 2026-05-22T12:00:00Z; cache_invalid_until == 2026-05-22T18:00:00Z.
     // 30 minutes later → Fresh bucket.
@@ -183,6 +185,82 @@ class PresidentialViewModelTest {
                 val error = awaitItem()
                 assertTrue(error is PresidentialUiState.Error)
                 assertEquals("boom", (error as PresidentialUiState.Error).message)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `retry after error transitions from error to loading to loaded`() =
+        runTest {
+            val repo = mockk<PresidentialRepository>()
+            var calls = 0
+            coEvery { repo.fetch() } answers {
+                calls++
+                if (calls == 1) error("transient") else Fixtures.fivePresidentialCandidates()
+            }
+            coEvery { repo.cached() } returns null
+
+            val viewModel = PresidentialViewModel(repo, freshClock)
+
+            viewModel.state.test {
+                assertEquals(PresidentialUiState.Loading, awaitItem())
+                advanceUntilIdle()
+                assertTrue(awaitItem() is PresidentialUiState.Error)
+
+                viewModel.load()
+                assertEquals(PresidentialUiState.Loading, awaitItem())
+                advanceUntilIdle()
+                val ready = awaitItem()
+                assertTrue(ready is PresidentialUiState.Loaded)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `BlackoutException from repository emits Blackout state with computed resume instant`() =
+        runTest {
+            val repo = mockk<PresidentialRepository>()
+            coEvery { repo.fetch() } throws BlackoutException("/v1/forecast/presidential")
+
+            // 2026-05-23 is a Saturday in GT (UTC-6). Next Sunday at 18:00 GT
+            // is 2026-05-24T18:00 GT = 2026-05-25T00:00:00Z.
+            val saturdayMidnightUtc = Instant.parse("2026-05-23T12:00:00Z")
+            val saturdayClock = Clock.fixed(saturdayMidnightUtc, ZoneOffset.UTC)
+            val viewModel = PresidentialViewModel(repo, saturdayClock)
+
+            viewModel.state.test {
+                assertEquals(PresidentialUiState.Loading, awaitItem())
+                advanceUntilIdle()
+                val blackout = awaitItem()
+                assertTrue(blackout is PresidentialUiState.Blackout)
+                val resume = (blackout as PresidentialUiState.Blackout).resumeAt
+                assertEquals(Instant.parse("2026-05-25T00:00:00Z"), resume)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `successful fetch after a Blackout restores Loaded state`() =
+        runTest {
+            val repo = mockk<PresidentialRepository>()
+            var calls = 0
+            coEvery { repo.fetch() } answers {
+                calls++
+                if (calls == 1) throw BlackoutException("/v1/forecast/presidential")
+                Fixtures.fivePresidentialCandidates()
+            }
+
+            val viewModel = PresidentialViewModel(repo, freshClock)
+
+            viewModel.state.test {
+                assertEquals(PresidentialUiState.Loading, awaitItem())
+                advanceUntilIdle()
+                assertTrue(awaitItem() is PresidentialUiState.Blackout)
+
+                viewModel.load()
+                assertEquals(PresidentialUiState.Loading, awaitItem())
+                advanceUntilIdle()
+                assertTrue(awaitItem() is PresidentialUiState.Loaded)
                 cancelAndIgnoreRemainingEvents()
             }
         }

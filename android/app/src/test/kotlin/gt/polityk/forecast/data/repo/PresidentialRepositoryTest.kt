@@ -2,6 +2,7 @@ package gt.polityk.forecast.data.repo
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import gt.polityk.forecast.data.api.BlackoutException
 import gt.polityk.forecast.data.api.PolitykApi
 import gt.polityk.forecast.data.api.PresidentialPayload
 import gt.polityk.forecast.data.db.ForecastCacheDao
@@ -15,6 +16,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import java.time.Clock
 import java.time.Instant
@@ -159,5 +162,122 @@ class PresidentialRepositoryTest {
 
             val repo = PresidentialRepository(api, dao, adapter, fixedClock)
             assertNull(repo.cached())
+        }
+
+    @Test
+    fun `fetch on BlackoutException wipes the cached endpoint and rethrows`() =
+        runTest {
+            val api = mockk<PolitykApi>()
+            val dao = mockk<ForecastCacheDao>(relaxed = true)
+            val blackout = BlackoutException(PresidentialRepository.PRESIDENTIAL_ENDPOINT_KEY)
+            coEvery { api.getPresidential() } throws blackout
+
+            val repo = PresidentialRepository(api, dao, adapter, fixedClock)
+            val thrown =
+                assertThrows(BlackoutException::class.java) {
+                    kotlinx.coroutines.runBlocking { repo.fetch() }
+                }
+
+            assertSame(blackout, thrown)
+            coVerify(exactly = 1) { dao.deleteByEndpoint(PresidentialRepository.PRESIDENTIAL_ENDPOINT_KEY) }
+            coVerify(exactly = 0) { dao.upsert(any()) }
+        }
+
+    @Test
+    fun `fetch still rethrows BlackoutException even when cache wipe fails`() =
+        runTest {
+            val api = mockk<PolitykApi>()
+            val dao = mockk<ForecastCacheDao>()
+            coEvery { api.getPresidential() } throws BlackoutException("/v1/forecast/presidential")
+            coEvery { dao.deleteByEndpoint(any()) } throws RuntimeException("disk full")
+
+            val repo = PresidentialRepository(api, dao, adapter, fixedClock)
+            assertThrows(BlackoutException::class.java) {
+                kotlinx.coroutines.runBlocking { repo.fetch() }
+            }
+        }
+
+    @Test
+    fun `readCacheIfValid returns the entry when cache_invalid_until is in the future`() =
+        runTest {
+            val dao = mockk<ForecastCacheDao>()
+            val futureMs = Instant.parse("2026-05-22T18:00:00Z").toEpochMilli()
+            val entry =
+                ForecastCacheEntity(
+                    endpointUrl = PresidentialRepository.PRESIDENTIAL_ENDPOINT_KEY,
+                    payloadJson = "{}",
+                    generatedAtEpochMs = null,
+                    cacheInvalidUntilEpochMs = futureMs,
+                    fetchedAtEpochMs = 0,
+                )
+            coEvery { dao.get(any()) } returns entry
+
+            val repo = PresidentialRepository(mockk(), dao, adapter, fixedClock)
+            assertEquals(entry, repo.readCacheIfValid())
+        }
+
+    @Test
+    fun `readCacheIfValid returns null when cache_invalid_until is in the past`() =
+        runTest {
+            val dao = mockk<ForecastCacheDao>()
+            val pastMs = Instant.parse("2026-05-22T12:00:00Z").toEpochMilli()
+            val entry =
+                ForecastCacheEntity(
+                    endpointUrl = PresidentialRepository.PRESIDENTIAL_ENDPOINT_KEY,
+                    payloadJson = "{}",
+                    generatedAtEpochMs = null,
+                    cacheInvalidUntilEpochMs = pastMs,
+                    fetchedAtEpochMs = 0,
+                )
+            coEvery { dao.get(any()) } returns entry
+
+            val repo = PresidentialRepository(mockk(), dao, adapter, fixedClock)
+            assertNull(repo.readCacheIfValid())
+        }
+
+    @Test
+    fun `readCacheIfValid treats cache_invalid_until equal to now as expired`() =
+        runTest {
+            val dao = mockk<ForecastCacheDao>()
+            val entry =
+                ForecastCacheEntity(
+                    endpointUrl = PresidentialRepository.PRESIDENTIAL_ENDPOINT_KEY,
+                    payloadJson = "{}",
+                    generatedAtEpochMs = null,
+                    cacheInvalidUntilEpochMs = fixedClock.millis(),
+                    fetchedAtEpochMs = 0,
+                )
+            coEvery { dao.get(any()) } returns entry
+
+            val repo = PresidentialRepository(mockk(), dao, adapter, fixedClock)
+            assertNull(repo.readCacheIfValid())
+        }
+
+    @Test
+    fun `readCacheIfValid returns the entry when cache_invalid_until is null`() =
+        runTest {
+            val dao = mockk<ForecastCacheDao>()
+            val entry =
+                ForecastCacheEntity(
+                    endpointUrl = PresidentialRepository.PRESIDENTIAL_ENDPOINT_KEY,
+                    payloadJson = "{}",
+                    generatedAtEpochMs = null,
+                    cacheInvalidUntilEpochMs = null,
+                    fetchedAtEpochMs = 0,
+                )
+            coEvery { dao.get(any()) } returns entry
+
+            val repo = PresidentialRepository(mockk(), dao, adapter, fixedClock)
+            assertEquals(entry, repo.readCacheIfValid())
+        }
+
+    @Test
+    fun `readCacheIfValid returns null when nothing is cached`() =
+        runTest {
+            val dao = mockk<ForecastCacheDao>()
+            coEvery { dao.get(any()) } returns null
+
+            val repo = PresidentialRepository(mockk(), dao, adapter, fixedClock)
+            assertNull(repo.readCacheIfValid())
         }
 }

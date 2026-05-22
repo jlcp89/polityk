@@ -41,6 +41,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import gt.polityk.forecast.R
 import gt.polityk.forecast.data.api.Candidate
 import gt.polityk.forecast.data.api.PresidentialPayload
+import gt.polityk.forecast.ui.blackout.BlackoutSplash
 import gt.polityk.forecast.ui.common.RelativeTime
 import java.time.Clock
 
@@ -91,6 +92,7 @@ fun PresidentialScreen(
                 is PresidentialUiState.Error -> ErrorState(message = state.message, onRetry = onRetry)
                 PresidentialUiState.NoRecentData -> NoRecentDataState(onRetry = onRetry)
                 is PresidentialUiState.Loaded -> LoadedContent(state = state, onRetry = onRetry, clock = clock)
+                is PresidentialUiState.Blackout -> BlackoutSplash(resumeAt = state.resumeAt)
             }
         }
     }
