@@ -1,0 +1,26 @@
+{
+  "model_version": "0.1.0",
+  "generated_at": "2026-05-22T06:00:00Z",
+  "presidential": {
+    "pollster_bias_priors": [
+      {"pollster": "ProDatos", "historical_bias_mean": 0.063, "historical_bias_sd": 0.04, "sample_count_used": 8},
+      {"pollster": "CID Gallup", "historical_bias_mean": -0.012, "historical_bias_sd": 0.03, "sample_count_used": 11},
+      {"pollster": "Borge y Asociados", "historical_bias_mean": 0.005, "historical_bias_sd": 0.05, "sample_count_used": 4}
+    ],
+    "fundamentals_features": [
+      "incumbent_party",
+      "gdp_growth_yoy",
+      "inflation_yoy",
+      "remittance_growth_yoy",
+      "homicide_rate_yoy",
+      "sentiment_trend_30d"
+    ],
+    "sentiment_as_modelled_input": false,
+    "calibration_thresholds": {
+      "c1_80pct_coverage": 0.80,
+      "c2_95pct_coverage": 0.95,
+      "c3_top3_mae_pp": 5.0
+    }
+  },
+  "long_form_url": "https://polityk.gt/methodology#presidential-0.1.0"
+}

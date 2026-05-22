@@ -113,6 +113,8 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.compose.material.icons.extended)
 
     implementation(libs.retrofit.core)
     implementation(libs.retrofit.converter.moshi)

@@ -14,6 +14,9 @@ import gt.polityk.forecast.data.api.VoteShareQuantiles
 import gt.polityk.forecast.ui.theme.PolitykTheme
 import org.junit.Rule
 import org.junit.Test
+import java.time.Clock
+import java.time.Instant
+import java.time.ZoneOffset
 
 class PresidentialScreenTest {
     @get:Rule
@@ -54,6 +57,48 @@ class PresidentialScreenTest {
             }
         }
         composeRule.onNodeWithTag(LOADING_TEST_TAG).assertIsDisplayed()
+    }
+
+    @Test
+    fun last_updated_stamp_renders_for_one_hour_six_hours_and_one_day_buckets() {
+        val payload = fivePresidentialCandidatesFixture()
+        val cases =
+            listOf(
+                Pair("2026-05-22T11:00:00Z", "Actualizado hace 1 hora"),
+                Pair("2026-05-22T06:00:00Z", "Actualizado hace 6 horas"),
+                Pair("2026-05-21T12:00:00Z", "Actualizado hace 1 día"),
+            )
+        cases.forEach { (generated, expected) ->
+            val clock = Clock.fixed(Instant.parse("2026-05-22T12:00:00Z"), ZoneOffset.UTC)
+            val mutated = payload.copy(generatedAt = generated)
+
+            composeRule.setContent {
+                PolitykTheme {
+                    PresidentialScreen(
+                        state = PresidentialUiState.Ready(mutated),
+                        onRetry = {},
+                        clock = clock,
+                        onOpenMethodology = {},
+                    )
+                }
+            }
+
+            composeRule.onNodeWithTag(LAST_UPDATED_STAMP_TEST_TAG).assertIsDisplayed()
+            composeRule.onNodeWithText(expected).assertIsDisplayed()
+        }
+    }
+
+    @Test
+    fun methodology_icon_is_visible_on_ready_state() {
+        composeRule.setContent {
+            PolitykTheme {
+                PresidentialScreen(
+                    state = PresidentialUiState.Ready(fivePresidentialCandidatesFixture()),
+                    onRetry = {},
+                )
+            }
+        }
+        composeRule.onNodeWithTag(METHODOLOGY_ICON_TEST_TAG).assertIsDisplayed()
     }
 
     @Test
