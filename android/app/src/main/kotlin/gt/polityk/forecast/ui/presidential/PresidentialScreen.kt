@@ -1,5 +1,6 @@
 package gt.polityk.forecast.ui.presidential
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material3.Button
@@ -29,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -86,7 +89,8 @@ fun PresidentialScreen(
             when (state) {
                 PresidentialUiState.Loading -> LoadingState()
                 is PresidentialUiState.Error -> ErrorState(message = state.message, onRetry = onRetry)
-                is PresidentialUiState.Ready -> ReadyContent(payload = state.payload, clock = clock)
+                PresidentialUiState.NoRecentData -> NoRecentDataState(onRetry = onRetry)
+                is PresidentialUiState.Loaded -> LoadedContent(state = state, onRetry = onRetry, clock = clock)
             }
         }
     }
@@ -142,11 +146,45 @@ private fun ErrorState(
 }
 
 @Composable
-private fun ReadyContent(
-    payload: PresidentialPayload,
+private fun NoRecentDataState(onRetry: () -> Unit) {
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(24.dp)
+                .testTag(NO_RECENT_DATA_TEST_TAG),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = stringResource(R.string.no_recent_data_title),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = stringResource(R.string.no_recent_data_body),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                modifier = Modifier.testTag(NO_RECENT_DATA_RETRY_TAG),
+                onClick = onRetry,
+            ) {
+                Text(text = stringResource(R.string.state_error_retry))
+            }
+        }
+    }
+}
+
+@Composable
+private fun LoadedContent(
+    state: PresidentialUiState.Loaded,
+    onRetry: () -> Unit,
     clock: Clock,
 ) {
-    val sorted = payload.candidates.sortedByDescending { it.voteShare.p50 }
+    val sorted = state.payload.candidates.sortedByDescending { it.voteShare.p50 }
     LazyColumn(
         modifier =
             Modifier
@@ -155,15 +193,78 @@ private fun ReadyContent(
         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 24.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
-        item { Header(payload = payload, clock = clock) }
+        item { FreshnessBanner(state = state, onRetry = onRetry) }
+        item { Header(payload = state.payload, clock = clock) }
         items(items = sorted, key = Candidate::candidateId) { candidate ->
             CandidateRow(candidate = candidate)
         }
         item {
             RunoffMatrixSection(
-                candidates = payload.candidates,
-                runoffMatrix = payload.runoffMatrix,
+                candidates = state.payload.candidates,
+                runoffMatrix = state.payload.runoffMatrix,
             )
+        }
+    }
+}
+
+@Composable
+private fun FreshnessBanner(
+    state: PresidentialUiState.Loaded,
+    onRetry: () -> Unit,
+) {
+    when (state) {
+        is PresidentialUiState.Fresh -> Unit
+        is PresidentialUiState.SlightlyStale ->
+            Banner(
+                color = BANNER_YELLOW,
+                textColor = BANNER_YELLOW_TEXT,
+                tag = BANNER_YELLOW_TEST_TAG,
+                message = stringResource(R.string.banner_slightly_stale, state.ageHours),
+                onRetry = null,
+            )
+        is PresidentialUiState.Stale ->
+            Banner(
+                color = BANNER_RED,
+                textColor = BANNER_RED_TEXT,
+                tag = BANNER_RED_TEST_TAG,
+                message = stringResource(R.string.banner_stale, state.ageHours),
+                onRetry = onRetry,
+            )
+    }
+}
+
+@Composable
+private fun Banner(
+    color: Color,
+    textColor: Color,
+    tag: String,
+    message: String,
+    onRetry: (() -> Unit)?,
+) {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .background(color = color, shape = RoundedCornerShape(8.dp))
+                .padding(horizontal = 16.dp, vertical = 12.dp)
+                .testTag(tag),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodySmall,
+            color = textColor,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.fillMaxWidth(if (onRetry != null) WEIGHT_TEXT_WITH_RETRY else 1f),
+        )
+        if (onRetry != null) {
+            Button(
+                modifier = Modifier.testTag(BANNER_RETRY_TAG),
+                onClick = onRetry,
+            ) {
+                Text(text = stringResource(R.string.state_error_retry))
+            }
         }
     }
 }
@@ -276,3 +377,15 @@ const val ERROR_TEST_TAG: String = "state-error"
 const val READY_TEST_TAG: String = "state-ready"
 const val METHODOLOGY_ICON_TEST_TAG: String = "presidential-methodology-icon"
 const val LAST_UPDATED_STAMP_TEST_TAG: String = "presidential-last-updated"
+const val LAST_UPDATED_STAMP_TAG: String = "presidential-last-updated"
+const val NO_RECENT_DATA_TEST_TAG: String = "state-no-recent-data"
+const val NO_RECENT_DATA_RETRY_TAG: String = "no-recent-data-retry"
+const val BANNER_YELLOW_TEST_TAG: String = "banner-slightly-stale"
+const val BANNER_RED_TEST_TAG: String = "banner-stale"
+const val BANNER_RETRY_TAG: String = "banner-retry"
+
+private val BANNER_YELLOW = Color(0xFFFFF3CD)
+private val BANNER_YELLOW_TEXT = Color(0xFF664D03)
+private val BANNER_RED = Color(0xFFF8D7DA)
+private val BANNER_RED_TEXT = Color(0xFF842029)
+private const val WEIGHT_TEXT_WITH_RETRY = 0.65f

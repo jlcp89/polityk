@@ -21,7 +21,7 @@ fun PolitykNavHost() {
         composable(PolitykRoutes.PRESIDENTIAL) {
             val viewModel: PresidentialViewModel = hiltViewModel()
             val state by viewModel.state.collectAsStateWithLifecycle()
-            val runId = (state as? PresidentialUiState.Ready)?.payload?.runId
+            val runId = (state as? PresidentialUiState.Loaded)?.payload?.runId
             PresidentialRoute(
                 viewModel = viewModel,
                 onOpenMethodology = {

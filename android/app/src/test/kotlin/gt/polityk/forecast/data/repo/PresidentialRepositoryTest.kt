@@ -104,4 +104,60 @@ class PresidentialRepositoryTest {
 
             assertNull(captured.captured.generatedAtEpochMs)
         }
+
+    @Test
+    fun `cached returns a parsed CachedForecast when the DAO has a row`() =
+        runTest {
+            val payload = Fixtures.fivePresidentialCandidates()
+            val entity =
+                ForecastCacheEntity(
+                    endpointUrl = PresidentialRepository.PRESIDENTIAL_ENDPOINT_KEY,
+                    payloadJson = adapter.toJson(payload),
+                    generatedAtEpochMs = 1_000L,
+                    cacheInvalidUntilEpochMs = 2_000L,
+                    fetchedAtEpochMs = 1_500L,
+                )
+            val api = mockk<PolitykApi>()
+            val dao = mockk<ForecastCacheDao>()
+            coEvery { dao.get(PresidentialRepository.PRESIDENTIAL_ENDPOINT_KEY) } returns entity
+
+            val repo = PresidentialRepository(api, dao, adapter, fixedClock)
+            val cached = repo.cached()
+
+            assertNotNull(cached)
+            assertEquals(payload, cached!!.payload)
+            assertEquals(1_000L, cached.generatedAtEpochMs)
+            assertEquals(2_000L, cached.cacheInvalidUntilEpochMs)
+            assertEquals(1_500L, cached.fetchedAtEpochMs)
+        }
+
+    @Test
+    fun `cached returns null when the DAO has no row`() =
+        runTest {
+            val api = mockk<PolitykApi>()
+            val dao = mockk<ForecastCacheDao>()
+            coEvery { dao.get(any()) } returns null
+
+            val repo = PresidentialRepository(api, dao, adapter, fixedClock)
+            assertNull(repo.cached())
+        }
+
+    @Test
+    fun `cached returns null when the payload blob is corrupt`() =
+        runTest {
+            val entity =
+                ForecastCacheEntity(
+                    endpointUrl = PresidentialRepository.PRESIDENTIAL_ENDPOINT_KEY,
+                    payloadJson = "{not valid json",
+                    generatedAtEpochMs = 1L,
+                    cacheInvalidUntilEpochMs = null,
+                    fetchedAtEpochMs = 2L,
+                )
+            val api = mockk<PolitykApi>()
+            val dao = mockk<ForecastCacheDao>()
+            coEvery { dao.get(any()) } returns entity
+
+            val repo = PresidentialRepository(api, dao, adapter, fixedClock)
+            assertNull(repo.cached())
+        }
 }

@@ -12,9 +12,13 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Fetches the presidential forecast and writes the raw payload into the Room
- * cache for later freshness checks (issue #42). This issue scaffolds cache
- * **writes only** — there is no read-through here. Tests assert the write side.
+ * Read-write cache for the presidential forecast.
+ *
+ * - [fetch]    : network → cache write → return payload.
+ * - [cached]   : Room read-through. Returns the typed cache row (with parsed
+ *                payload + freshness metadata) for issue #42's banner state
+ *                machine. `null` when nothing has been cached yet or the row
+ *                cannot be re-parsed.
  */
 @Singleton
 class PresidentialRepository
@@ -41,6 +45,19 @@ class PresidentialRepository
             return payload
         }
 
+        suspend fun cached(): CachedForecast? {
+            val entity = cacheDao.get(PRESIDENTIAL_ENDPOINT_KEY) ?: return null
+            val payload =
+                runCatching { payloadAdapter.fromJson(entity.payloadJson) }
+                    .getOrNull() ?: return null
+            return CachedForecast(
+                payload = payload,
+                generatedAtEpochMs = entity.generatedAtEpochMs,
+                cacheInvalidUntilEpochMs = entity.cacheInvalidUntilEpochMs,
+                fetchedAtEpochMs = entity.fetchedAtEpochMs,
+            )
+        }
+
         private fun parseIsoToEpochMs(iso: String): Long? =
             try {
                 OffsetDateTime.parse(iso).toInstant().toEpochMilli()
@@ -52,3 +69,10 @@ class PresidentialRepository
             const val PRESIDENTIAL_ENDPOINT_KEY: String = "/v1/forecast/presidential"
         }
     }
+
+data class CachedForecast(
+    val payload: PresidentialPayload,
+    val generatedAtEpochMs: Long?,
+    val cacheInvalidUntilEpochMs: Long?,
+    val fetchedAtEpochMs: Long,
+)
