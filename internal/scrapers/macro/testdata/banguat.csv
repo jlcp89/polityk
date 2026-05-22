@@ -1,0 +1,11 @@
+code,observed_at,value,unit
+# Banguat open-data export: GDP YoY, inflation YoY, remittance inflow YoY.
+gdp_yoy_growth,2024-12-31,3.5,percent
+gdp_yoy_growth,2025-03-31,3.2,percent
+inflation_yoy,2025-01,4.1,percent
+inflation_yoy,2025-02,3.9,percent
+inflation_yoy,2025-03,3.8,percent
+remittance_inflow_yoy,2025-01,8.6,percent
+remittance_inflow_yoy,2025-02,7.9,percent
+# rows with empty values are skipped silently (future quarters):
+remittance_inflow_yoy,2025-04,,percent

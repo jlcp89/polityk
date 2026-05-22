@@ -1,0 +1,5 @@
+code,observed_at,value,unit
+# SEGEPLAN open-data export: selected planning indicators per fundamentals layer.
+poverty_index,2024-12-31,0.561,ratio
+food_insecurity_index,2024-12-31,0.482,ratio
+gini_coefficient,2024-12-31,0.493,ratio
