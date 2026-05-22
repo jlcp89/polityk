@@ -42,6 +42,7 @@ func main() {
 	var facts handlers.FactsChecker
 	var forecasts handlers.ForecastReader
 	var healthInfo handlers.HealthInfoReader
+	var pollsterBias handlers.PollsterBiasReader
 	if dsn := os.Getenv("DATABASE_URL"); dsn != "" {
 		db, err := sql.Open("pgx", dsn)
 		if err != nil {
@@ -71,6 +72,7 @@ func main() {
 		}()
 
 		healthInfo = &store.HealthInfo{DB: db}
+		pollsterBias = &store.PollsterBiasReader{DB: db}
 		logger.Info("db_connected")
 	} else {
 		logger.Info("db_skipped_no_dsn")
@@ -78,6 +80,12 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /v1/health", handlers.NewHealth(dims, facts, healthInfo))
+	// /v1/methodology is NOT mounted under the blackout middleware per
+	// ADR-003 / ADR-014 — methodology disclosure stays available during
+	// the silencio electoral so citizens can audit how the (suspended)
+	// forecast is computed.
+	mux.HandleFunc("GET /v1/methodology",
+		handlers.NewMethodology(pollsterBias, handlers.DefaultMethodologyConfig()))
 
 	// Forecast routes are blackout-gated per ADR-003. Handlers registered
 	// on forecastMux automatically inherit the 503 short-circuit when
