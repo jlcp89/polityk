@@ -25,3 +25,27 @@ func (c *DimensionsChecker) DimensionsSeeded(ctx context.Context) (bool, error) 
 	}
 	return count > 0, nil
 }
+
+// FactsChecker reports whether the three race-specific fact tables introduced
+// by migration 0003 exist. "Exist" — not "populated" — because the truth
+// loaders in #19–#22 land later; /v1/health just needs to confirm the schema
+// is in place.
+type FactsChecker struct {
+	DB *sql.DB
+}
+
+// FactsReady returns true iff `presidential_results`, `congress_results`, and
+// `municipal_results` are all present in the current database.
+func (c *FactsChecker) FactsReady(ctx context.Context) (bool, error) {
+	const q = `
+		SELECT COUNT(*)
+		FROM information_schema.tables
+		WHERE table_schema = current_schema()
+		  AND table_name IN ('presidential_results', 'congress_results', 'municipal_results')
+	`
+	var count int
+	if err := c.DB.QueryRowContext(ctx, q).Scan(&count); err != nil {
+		return false, err
+	}
+	return count == 3, nil
+}
