@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -136,6 +138,87 @@ func TestBlackout_FlagFlipMidTest(t *testing.T) {
 	t.Setenv("BLACKOUT_ENABLED", "false")
 	if got := doRequest(); got != http.StatusOK {
 		t.Fatalf("flag flipped back to false: got %d want %d", got, http.StatusOK)
+	}
+}
+
+// TestBlackout_FlagFile covers the file-backed source the CLI in #46 writes
+// to. When BLACKOUT_FLAG_FILE is set, the file contents take precedence over
+// BLACKOUT_ENABLED so a single `blackout enable` flips the live API without
+// a process restart. When the env var is unset the legacy env-only path is
+// preserved.
+func TestBlackout_FlagFile(t *testing.T) {
+	tests := []struct {
+		name       string
+		fileExists bool
+		fileBody   string
+		envValue   string
+		wantStatus int
+	}{
+		{"file=true overrides env=false → 503", true, "true\n", "false", http.StatusServiceUnavailable},
+		{"file=false overrides env=true → 200", true, "false\n", "true", http.StatusOK},
+		{"file missing falls through to env=true → 503", false, "", "true", http.StatusServiceUnavailable},
+		{"file missing falls through to env=false → 200", false, "", "false", http.StatusOK},
+		{"file=garbage fail-open (does NOT fall through to env=true) → 200", true, "maybe\n", "true", http.StatusOK},
+		{"file empty fail-open → 200", true, "", "true", http.StatusOK},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dir := t.TempDir()
+			path := filepath.Join(dir, "blackout.flag")
+			if tt.fileExists {
+				if err := os.WriteFile(path, []byte(tt.fileBody), 0o600); err != nil {
+					t.Fatalf("write flag file: %v", err)
+				}
+			}
+			t.Setenv("BLACKOUT_FLAG_FILE", path)
+			t.Setenv("BLACKOUT_ENABLED", tt.envValue)
+
+			req := httptest.NewRequest(http.MethodGet, "/v1/forecast/presidential", nil)
+			rec := httptest.NewRecorder()
+			Blackout(http.HandlerFunc(okHandler)).ServeHTTP(rec, req)
+			if got := rec.Code; got != tt.wantStatus {
+				t.Fatalf("status: got %d want %d (body=%q)", got, tt.wantStatus, rec.Body.String())
+			}
+		})
+	}
+}
+
+// TestBlackout_FlagFileFlipsLive proves the property the CLI (#46) depends on:
+// rewriting the file between two requests changes the second request's
+// behaviour. This is what makes the manual-override path safe.
+func TestBlackout_FlagFileFlipsLive(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "blackout.flag")
+	t.Setenv("BLACKOUT_FLAG_FILE", path)
+	t.Setenv("BLACKOUT_ENABLED", "false")
+
+	handler := Blackout(http.HandlerFunc(okHandler))
+	do := func() int {
+		req := httptest.NewRequest(http.MethodGet, "/v1/forecast/presidential", nil)
+		rec := httptest.NewRecorder()
+		handler.ServeHTTP(rec, req)
+		return rec.Code
+	}
+
+	if err := os.WriteFile(path, []byte("false\n"), 0o600); err != nil {
+		t.Fatalf("write: %v", err)
+	}
+	if got := do(); got != http.StatusOK {
+		t.Fatalf("file=false: got %d want %d", got, http.StatusOK)
+	}
+
+	if err := os.WriteFile(path, []byte("true\n"), 0o600); err != nil {
+		t.Fatalf("write: %v", err)
+	}
+	if got := do(); got != http.StatusServiceUnavailable {
+		t.Fatalf("file flipped to true: got %d want %d", got, http.StatusServiceUnavailable)
+	}
+
+	if err := os.WriteFile(path, []byte("false\n"), 0o600); err != nil {
+		t.Fatalf("write: %v", err)
+	}
+	if got := do(); got != http.StatusOK {
+		t.Fatalf("file flipped back to false: got %d want %d", got, http.StatusOK)
 	}
 }
 
