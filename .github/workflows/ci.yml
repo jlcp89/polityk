@@ -1,0 +1,103 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  go:
+    name: Go proof cycle
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache: true
+
+      - name: go vet
+        run: go vet ./...
+
+      - name: go test -race
+        run: go test -race ./...
+
+      - name: go build
+        run: go build ./...
+
+  migrations:
+    name: goose up/down/up round-trip
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: polityk
+          POSTGRES_PASSWORD: polityk
+          POSTGRES_DB: polityk_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U polityk -d polityk_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      GOOSE_DRIVER: postgres
+      GOOSE_DBSTRING: "host=localhost port=5432 user=polityk password=polityk dbname=polityk_ci sslmode=disable"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache: true
+
+      - name: Install goose
+        run: go install github.com/pressly/goose/v3/cmd/goose@v3.21.1
+
+      - name: Wait for Postgres
+        run: |
+          for i in $(seq 1 30); do
+            if pg_isready -h localhost -p 5432 -U polityk -d polityk_ci; then
+              echo "ready"; exit 0
+            fi
+            sleep 1
+          done
+          echo "postgres never became ready" >&2
+          exit 1
+
+      - name: goose up
+        run: goose -dir migrations up
+
+      - name: goose down (all)
+        run: goose -dir migrations reset
+
+      - name: goose up (again)
+        run: goose -dir migrations up
+
+  python:
+    name: Python (uv sync)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "0.4.27"
+
+      - name: Set up Python
+        run: uv python install 3.11
+
+      - name: uv sync
+        run: uv sync --all-extras
+
+      - name: pytest
+        run: uv run pytest pipeline/tests -v
