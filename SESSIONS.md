@@ -17,3 +17,4 @@ Written by `/wrap`. Read by `/recover`.
 ## Entries
 
 <!-- newest first; do not edit by hand — managed by /wrap -->
+2026-05-22 | #31 | main | fbfa94d | problem: fundamentals layer missing; 4 of 8 features lacked schema (incumbent map, approval, candidate-list dates) | fix: 3 migrations (party_of_government, election_key_dates, approval_ratings) + logit-Normal PyMC regression + LOO backtest; coverage gate passes | ref: pipeline/models/fundamentals.py, ADR-020
