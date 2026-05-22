@@ -1,0 +1,195 @@
+<!doctype html>
+<!--
+  Fixture for the TSE party-registry page parser. The structure here is a
+  stripped-down version of the table the live page renders; the parser
+  reads <tr class="party-row"> rows and extracts:
+    - data-tse-code attribute -> parties.tse_code
+    - data-status attribute   -> parties.status (party_status ENUM)
+    - <td class="name">       -> parties.name
+    - <td class="aliases">    -> party_aliases.alias_name (semicolon-separated)
+
+  Counts (asserted by parties_test.go):
+    - 28 rows with data-status="active"
+    - 10 rows with data-status="cancelled"
+    - 1  row  with data-status="cancelled_under_appeal" (Movimiento Semilla)
+    Total: 39 rows.
+
+  Party names are the real Guatemalan political parties relevant to the
+  2027 cycle as documented in CONTEXT.md (Domain Language: 28 active,
+  11 cancelled, Semilla under appeal). When the live TSE HTML structure
+  is observed in production, regenerate this fixture from a real GET.
+-->
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Partidos Políticos — Tribunal Supremo Electoral</title>
+</head>
+<body>
+  <h1>Registro de Partidos Políticos</h1>
+  <table id="parties">
+    <thead>
+      <tr><th>Nombre</th><th>Código</th><th>Estado</th></tr>
+    </thead>
+    <tbody>
+      <tr class="party-row" data-tse-code="UNE" data-status="active">
+        <td class="name">Unidad Nacional de la Esperanza</td>
+        <td class="aliases">UNE</td>
+      </tr>
+      <tr class="party-row" data-tse-code="VAMOS" data-status="active">
+        <td class="name">Vamos por una Guatemala Diferente</td>
+        <td class="aliases">Vamos</td>
+      </tr>
+      <tr class="party-row" data-tse-code="CABAL" data-status="active">
+        <td class="name">Cabal</td>
+        <td class="aliases"></td>
+      </tr>
+      <tr class="party-row" data-tse-code="TODOS" data-status="active">
+        <td class="name">Todos</td>
+        <td class="aliases"></td>
+      </tr>
+      <tr class="party-row" data-tse-code="VIVA" data-status="active">
+        <td class="name">Visión con Valores</td>
+        <td class="aliases">VIVA</td>
+      </tr>
+      <tr class="party-row" data-tse-code="PAN" data-status="active">
+        <td class="name">Partido de Avanzada Nacional</td>
+        <td class="aliases">PAN</td>
+      </tr>
+      <tr class="party-row" data-tse-code="CREO" data-status="active">
+        <td class="name">Compromiso, Renovación y Orden</td>
+        <td class="aliases">CREO</td>
+      </tr>
+      <tr class="party-row" data-tse-code="URNG-MAIZ" data-status="active">
+        <td class="name">Unidad Revolucionaria Nacional Guatemalteca - MAÍZ</td>
+        <td class="aliases">URNG-MAÍZ; URNG</td>
+      </tr>
+      <tr class="party-row" data-tse-code="WINAQ" data-status="active">
+        <td class="name">Winaq</td>
+        <td class="aliases"></td>
+      </tr>
+      <tr class="party-row" data-tse-code="UNIONISTA" data-status="active">
+        <td class="name">Partido Unionista</td>
+        <td class="aliases">Unionista</td>
+      </tr>
+      <tr class="party-row" data-tse-code="VICTORIA" data-status="active">
+        <td class="name">Victoria</td>
+        <td class="aliases"></td>
+      </tr>
+      <tr class="party-row" data-tse-code="NOSOTROS" data-status="active">
+        <td class="name">Nosotros</td>
+        <td class="aliases"></td>
+      </tr>
+      <tr class="party-row" data-tse-code="AZUL" data-status="active">
+        <td class="name">Movimiento Azul</td>
+        <td class="aliases">Azul</td>
+      </tr>
+      <tr class="party-row" data-tse-code="AVANZA" data-status="active">
+        <td class="name">Avanza</td>
+        <td class="aliases"></td>
+      </tr>
+      <tr class="party-row" data-tse-code="PPT" data-status="active">
+        <td class="name">Productividad y Trabajo</td>
+        <td class="aliases">PPT</td>
+      </tr>
+      <tr class="party-row" data-tse-code="VOS" data-status="active">
+        <td class="name">Voluntad, Oportunidad y Solidaridad</td>
+        <td class="aliases">VOS</td>
+      </tr>
+      <tr class="party-row" data-tse-code="PODEMOS" data-status="active">
+        <td class="name">Podemos</td>
+        <td class="aliases"></td>
+      </tr>
+      <tr class="party-row" data-tse-code="VALOR" data-status="active">
+        <td class="name">Valor</td>
+        <td class="aliases"></td>
+      </tr>
+      <tr class="party-row" data-tse-code="PRI" data-status="active">
+        <td class="name">Partido Republicano Institucional</td>
+        <td class="aliases">PRI</td>
+      </tr>
+      <tr class="party-row" data-tse-code="EG" data-status="active">
+        <td class="name">Encuentro por Guatemala</td>
+        <td class="aliases">EG</td>
+      </tr>
+      <tr class="party-row" data-tse-code="MPH" data-status="active">
+        <td class="name">Movimiento Político Humanista</td>
+        <td class="aliases">MPH; Humanista</td>
+      </tr>
+      <tr class="party-row" data-tse-code="CAMBIO" data-status="active">
+        <td class="name">Cambio</td>
+        <td class="aliases"></td>
+      </tr>
+      <tr class="party-row" data-tse-code="PAIS" data-status="active">
+        <td class="name">Político Avanzado, Integro y Solidario</td>
+        <td class="aliases">PAIS</td>
+      </tr>
+      <tr class="party-row" data-tse-code="BIEN" data-status="active">
+        <td class="name">Movimiento para la Liberación de los Pueblos</td>
+        <td class="aliases">BIEN</td>
+      </tr>
+      <tr class="party-row" data-tse-code="UCN" data-status="active">
+        <td class="name">Unión del Cambio Nacional</td>
+        <td class="aliases">UCN</td>
+      </tr>
+      <tr class="party-row" data-tse-code="FCN-NACION" data-status="active">
+        <td class="name">Frente de Convergencia Nacional</td>
+        <td class="aliases">FCN-Nación; FCN</td>
+      </tr>
+      <tr class="party-row" data-tse-code="FUERZA" data-status="active">
+        <td class="name">Fuerza</td>
+        <td class="aliases"></td>
+      </tr>
+      <tr class="party-row" data-tse-code="PARTIDO_POPULAR" data-status="active">
+        <td class="name">Partido Popular</td>
+        <td class="aliases">Popular</td>
+      </tr>
+
+      <tr class="party-row" data-tse-code="SEMILLA" data-status="cancelled_under_appeal">
+        <td class="name">Movimiento Semilla</td>
+        <td class="aliases">Semilla</td>
+      </tr>
+
+      <tr class="party-row" data-tse-code="PRG" data-status="cancelled">
+        <td class="name">Partido Reformador Guatemalteco</td>
+        <td class="aliases">PRG</td>
+      </tr>
+      <tr class="party-row" data-tse-code="CN" data-status="cancelled">
+        <td class="name">Convergencia</td>
+        <td class="aliases">CN</td>
+      </tr>
+      <tr class="party-row" data-tse-code="MR" data-status="cancelled">
+        <td class="name">Movimiento Reformador</td>
+        <td class="aliases">MR</td>
+      </tr>
+      <tr class="party-row" data-tse-code="PROGRESO" data-status="cancelled">
+        <td class="name">Progreso</td>
+        <td class="aliases"></td>
+      </tr>
+      <tr class="party-row" data-tse-code="FRG" data-status="cancelled">
+        <td class="name">Frente Republicano Guatemalteco</td>
+        <td class="aliases">FRG</td>
+      </tr>
+      <tr class="party-row" data-tse-code="DCG" data-status="cancelled">
+        <td class="name">Democracia Cristiana Guatemalteca</td>
+        <td class="aliases">DCG</td>
+      </tr>
+      <tr class="party-row" data-tse-code="ANN" data-status="cancelled">
+        <td class="name">Alianza Nueva Nación</td>
+        <td class="aliases">ANN</td>
+      </tr>
+      <tr class="party-row" data-tse-code="PLG" data-status="cancelled">
+        <td class="name">Partido Liberal de Guatemala</td>
+        <td class="aliases">PLG</td>
+      </tr>
+      <tr class="party-row" data-tse-code="AMIGO" data-status="cancelled">
+        <td class="name">Alianza Movimiento Independiente Guatemalteco Organizado</td>
+        <td class="aliases">AMIGO</td>
+      </tr>
+      <tr class="party-row" data-tse-code="GUATE" data-status="cancelled">
+        <td class="name">Guate Solidaria</td>
+        <td class="aliases">Guate</td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>
