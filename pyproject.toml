@@ -7,6 +7,7 @@ dependencies = [
   "camelot-py>=1.0",
   "pdfplumber>=0.11",
   "psycopg[binary]>=3.2",
+  "openpyxl>=3.1",
 ]
 
 [project.optional-dependencies]
@@ -14,6 +15,7 @@ dev = [
   "pytest>=8.0",
   "ruff>=0.6",
   "mypy>=1.11",
+  "types-openpyxl>=3.1",
 ]
 # Sentiment NER stack — heavy, kept optional. Install with `uv sync --extra sentiment`
 # and `python -m spacy download es_core_news_sm`. The entity resolver runs
