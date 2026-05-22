@@ -130,7 +130,7 @@ Think before editing (SAIV — `.claude/rules/thinking-protocol.md`). After EVER
 |------|-----------|------|------|-------|
 | Go | `go vet ./...` | `golangci-lint run` | `go test ./...` | `go build ./...` |
 | Python | `uv run mypy pipeline/` | `uv run ruff check pipeline/` | `uv run pytest pipeline/tests/` | n/a |
-| Android | `./gradlew :app:compileDebugKotlin` | `./gradlew detekt ktlintCheck` | `./gradlew test` | `./gradlew assembleDebug` |
+| Android | `./gradlew :app:compileDebugKotlin` | `./gradlew detekt ktlintCheck` | `./gradlew test` | `./gradlew assembleDebug` | Oficial Mobile design on `polityc/android/app`
 
 ## Hooks
 
