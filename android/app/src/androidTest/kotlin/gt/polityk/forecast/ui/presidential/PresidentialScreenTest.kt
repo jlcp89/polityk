@@ -26,7 +26,7 @@ class PresidentialScreenTest {
         composeRule.setContent {
             PolitykTheme {
                 PresidentialScreen(
-                    state = PresidentialUiState.Ready(payload),
+                    state = PresidentialUiState.Fresh(payload, ageHours = 1L),
                     onRetry = {},
                 )
             }

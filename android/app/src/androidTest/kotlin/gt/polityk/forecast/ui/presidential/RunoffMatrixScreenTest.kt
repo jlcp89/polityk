@@ -24,7 +24,7 @@ class RunoffMatrixScreenTest {
 
         composeRule.setContent {
             PolitykTheme {
-                PresidentialScreen(state = PresidentialUiState.Ready(payload), onRetry = {})
+                PresidentialScreen(state = PresidentialUiState.Fresh(payload, ageHours = 1L), onRetry = {})
             }
         }
 
@@ -49,7 +49,7 @@ class RunoffMatrixScreenTest {
 
         composeRule.setContent {
             PolitykTheme {
-                PresidentialScreen(state = PresidentialUiState.Ready(payload), onRetry = {})
+                PresidentialScreen(state = PresidentialUiState.Fresh(payload, ageHours = 1L), onRetry = {})
             }
         }
 
@@ -65,7 +65,7 @@ class RunoffMatrixScreenTest {
 
         composeRule.setContent {
             PolitykTheme {
-                PresidentialScreen(state = PresidentialUiState.Ready(payload), onRetry = {})
+                PresidentialScreen(state = PresidentialUiState.Fresh(payload, ageHours = 1L), onRetry = {})
             }
         }
 

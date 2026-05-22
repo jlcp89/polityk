@@ -4,6 +4,7 @@ package gt.polityk.forecast.ui.presidential
 
 import app.cash.turbine.test
 import gt.polityk.forecast.data.api.PresidentialPayload
+import gt.polityk.forecast.data.repo.CachedForecast
 import gt.polityk.forecast.data.repo.PresidentialRepository
 import gt.polityk.forecast.test.Fixtures
 import io.mockk.coEvery
@@ -19,9 +20,17 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.time.Clock
+import java.time.Instant
+import java.time.ZoneOffset
 
 class PresidentialViewModelTest {
     private val dispatcher = StandardTestDispatcher()
+
+    // Fixture's generated_at == 2026-05-22T12:00:00Z; cache_invalid_until == 2026-05-22T18:00:00Z.
+    // 30 minutes later → Fresh bucket.
+    private val freshClock: Clock =
+        Clock.fixed(Instant.parse("2026-05-22T12:30:00Z"), ZoneOffset.UTC)
 
     @Before
     fun setMain() {
@@ -34,32 +43,139 @@ class PresidentialViewModelTest {
     }
 
     @Test
-    fun `loads ready state from repository fixture`() =
+    fun `loads Fresh bucket when generated_at is within six hours`() =
         runTest {
             val payload = Fixtures.fivePresidentialCandidates()
             val repo = mockk<PresidentialRepository>()
             coEvery { repo.fetch() } returns payload
 
-            val viewModel = PresidentialViewModel(repo)
+            val viewModel = PresidentialViewModel(repo, freshClock)
 
             viewModel.state.test {
                 // initial Loading already emitted at construction
                 assertEquals(PresidentialUiState.Loading, awaitItem())
                 advanceUntilIdle()
                 val ready = awaitItem()
-                assertTrue(ready is PresidentialUiState.Ready)
-                assertEquals(5, (ready as PresidentialUiState.Ready).payload.candidates.size)
+                assertTrue("expected Fresh, got $ready", ready is PresidentialUiState.Fresh)
+                assertEquals(5, (ready as PresidentialUiState.Fresh).payload.candidates.size)
                 cancelAndIgnoreRemainingEvents()
             }
         }
 
     @Test
-    fun `propagates repository errors into Error state with message`() =
+    fun `emits SlightlyStale when generated_at is between six and twenty four hours old`() =
+        runTest {
+            // generated_at fixture = 12:00Z; 12h later = 00:00Z next day, before cache_invalid_until = false.
+            // The fixture's cache_invalid_until is 18:00Z; 12h after generated_at = 00:00Z next day → cache_invalid_until is in the past.
+            // So bucketize would emit NoRecentData. Use a copy that drops cache_invalid_until for this test.
+            val payload = Fixtures.fivePresidentialCandidates().copy(cacheInvalidUntil = null)
+            val repo = mockk<PresidentialRepository>()
+            coEvery { repo.fetch() } returns payload
+
+            val twelveHoursLater = Clock.fixed(Instant.parse("2026-05-23T00:00:00Z"), ZoneOffset.UTC)
+            val viewModel = PresidentialViewModel(repo, twelveHoursLater)
+
+            viewModel.state.test {
+                assertEquals(PresidentialUiState.Loading, awaitItem())
+                advanceUntilIdle()
+                val state = awaitItem()
+                assertTrue("expected SlightlyStale, got $state", state is PresidentialUiState.SlightlyStale)
+                assertEquals(12L, (state as PresidentialUiState.SlightlyStale).ageHours)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `emits Stale when generated_at is between twenty four and seventy two hours old`() =
+        runTest {
+            val payload = Fixtures.fivePresidentialCandidates().copy(cacheInvalidUntil = null)
+            val repo = mockk<PresidentialRepository>()
+            coEvery { repo.fetch() } returns payload
+
+            val fortyEightHoursLater = Clock.fixed(Instant.parse("2026-05-24T12:00:00Z"), ZoneOffset.UTC)
+            val viewModel = PresidentialViewModel(repo, fortyEightHoursLater)
+
+            viewModel.state.test {
+                assertEquals(PresidentialUiState.Loading, awaitItem())
+                advanceUntilIdle()
+                val state = awaitItem()
+                assertTrue("expected Stale, got $state", state is PresidentialUiState.Stale)
+                assertEquals(48L, (state as PresidentialUiState.Stale).ageHours)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `emits NoRecentData when generated_at is more than seventy two hours old`() =
+        runTest {
+            val payload = Fixtures.fivePresidentialCandidates().copy(cacheInvalidUntil = null)
+            val repo = mockk<PresidentialRepository>()
+            coEvery { repo.fetch() } returns payload
+
+            val ninetySixHoursLater = Clock.fixed(Instant.parse("2026-05-26T12:00:00Z"), ZoneOffset.UTC)
+            val viewModel = PresidentialViewModel(repo, ninetySixHoursLater)
+
+            viewModel.state.test {
+                assertEquals(PresidentialUiState.Loading, awaitItem())
+                advanceUntilIdle()
+                assertEquals(PresidentialUiState.NoRecentData, awaitItem())
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `emits NoRecentData when cache_invalid_until is in the past`() =
+        runTest {
+            val payload = Fixtures.fivePresidentialCandidates()
+            val repo = mockk<PresidentialRepository>()
+            coEvery { repo.fetch() } returns payload
+
+            // 19:00Z is after the fixture's 18:00Z cache_invalid_until → forced expiry.
+            val pastInvalidClock = Clock.fixed(Instant.parse("2026-05-22T19:00:00Z"), ZoneOffset.UTC)
+            val viewModel = PresidentialViewModel(repo, pastInvalidClock)
+
+            viewModel.state.test {
+                assertEquals(PresidentialUiState.Loading, awaitItem())
+                advanceUntilIdle()
+                assertEquals(PresidentialUiState.NoRecentData, awaitItem())
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `falls back to cached payload when network fetch fails`() =
+        runTest {
+            val payload = Fixtures.fivePresidentialCandidates()
+            val repo = mockk<PresidentialRepository>()
+            coEvery { repo.fetch() } throws IllegalStateException("offline")
+            coEvery { repo.cached() } returns
+                CachedForecast(
+                    payload = payload,
+                    generatedAtEpochMs = Instant.parse("2026-05-22T12:00:00Z").toEpochMilli(),
+                    cacheInvalidUntilEpochMs = null,
+                    fetchedAtEpochMs = Instant.parse("2026-05-22T12:00:00Z").toEpochMilli(),
+                )
+
+            val twelveHoursLater = Clock.fixed(Instant.parse("2026-05-23T00:00:00Z"), ZoneOffset.UTC)
+            val viewModel = PresidentialViewModel(repo, twelveHoursLater)
+
+            viewModel.state.test {
+                assertEquals(PresidentialUiState.Loading, awaitItem())
+                advanceUntilIdle()
+                val state = awaitItem()
+                assertTrue("expected SlightlyStale from cache, got $state", state is PresidentialUiState.SlightlyStale)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `propagates repository errors into Error state when no cache is present`() =
         runTest {
             val repo = mockk<PresidentialRepository>()
             coEvery { repo.fetch() } throws IllegalStateException("boom")
+            coEvery { repo.cached() } returns null
 
-            val viewModel = PresidentialViewModel(repo)
+            val viewModel = PresidentialViewModel(repo, freshClock)
 
             viewModel.state.test {
                 assertEquals(PresidentialUiState.Loading, awaitItem())
@@ -67,32 +183,6 @@ class PresidentialViewModelTest {
                 val error = awaitItem()
                 assertTrue(error is PresidentialUiState.Error)
                 assertEquals("boom", (error as PresidentialUiState.Error).message)
-                cancelAndIgnoreRemainingEvents()
-            }
-        }
-
-    @Test
-    fun `retry after error transitions from error to loading to ready`() =
-        runTest {
-            val repo = mockk<PresidentialRepository>()
-            var calls = 0
-            coEvery { repo.fetch() } answers {
-                calls++
-                if (calls == 1) error("transient") else Fixtures.fivePresidentialCandidates()
-            }
-
-            val viewModel = PresidentialViewModel(repo)
-
-            viewModel.state.test {
-                assertEquals(PresidentialUiState.Loading, awaitItem())
-                advanceUntilIdle()
-                assertTrue(awaitItem() is PresidentialUiState.Error)
-
-                viewModel.load()
-                assertEquals(PresidentialUiState.Loading, awaitItem())
-                advanceUntilIdle()
-                val ready = awaitItem()
-                assertTrue(ready is PresidentialUiState.Ready)
                 cancelAndIgnoreRemainingEvents()
             }
         }

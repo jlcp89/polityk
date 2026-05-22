@@ -15,4 +15,9 @@
     <string name="runoff_matrix_title">Posibles segundas vueltas</string>
     <string name="runoff_matrix_empty">Aún no disponible</string>
     <string name="runoff_matrix_row_format">%1$s vs %2$s — %3$s → %4$s gana %5$s</string>
+    <string name="last_updated_hours">Actualizado hace %d horas</string>
+    <string name="banner_slightly_stale">Datos posiblemente desactualizados (hace %d h)</string>
+    <string name="banner_stale">Datos antiguos — actualizados hace %d h</string>
+    <string name="no_recent_data_title">Sin conexión reciente</string>
+    <string name="no_recent_data_body">No pudimos obtener un pronóstico reciente. Conéctate a la red y vuelve a intentarlo.</string>
 </resources>
