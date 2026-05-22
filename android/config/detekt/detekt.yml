@@ -1,0 +1,69 @@
+build:
+  maxIssues: 0
+  excludeCorrectable: false
+
+complexity:
+  TooManyFunctions:
+    active: false
+  LongMethod:
+    active: true
+    threshold: 80
+  LongParameterList:
+    active: true
+    functionThreshold: 8
+    constructorThreshold: 8
+  ComplexCondition:
+    active: true
+    threshold: 5
+  CyclomaticComplexMethod:
+    active: true
+    threshold: 20
+
+style:
+  MaxLineLength:
+    active: true
+    maxLineLength: 140
+    excludePackageStatements: true
+    excludeCommentStatements: true
+    excludeRawStrings: true
+  MagicNumber:
+    active: false
+  WildcardImport:
+    active: true
+    excludes: [ '**/test/**', '**/androidTest/**' ]
+  ReturnCount:
+    active: true
+    max: 4
+  ForbiddenComment:
+    active: false
+  UnusedPrivateMember:
+    active: true
+  FunctionOnlyReturningConstant:
+    active: false
+
+naming:
+  FunctionNaming:
+    active: true
+    functionPattern: '[a-zA-Z][a-zA-Z0-9]*'
+  TopLevelPropertyNaming:
+    active: true
+    constantPattern: '[A-Z][_A-Z0-9]*'
+  ObjectPropertyNaming:
+    active: true
+    constantPattern: '[A-Z][_A-Z0-9]*'
+    propertyPattern: '[A-Za-z][_A-Za-z0-9]*'
+
+empty-blocks:
+  EmptyFunctionBlock:
+    active: true
+    ignoreOverridden: true
+
+exceptions:
+  TooGenericExceptionCaught:
+    active: false
+  SwallowedException:
+    active: true
+
+potential-bugs:
+  UnsafeCallOnNullableType:
+    active: true

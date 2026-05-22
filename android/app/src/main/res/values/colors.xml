@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="polityk_paper">#FAF6EE</color>
+    <color name="polityk_ink">#1F1A14</color>
+    <color name="polityk_ink_soft">#4A4239</color>
+    <color name="polityk_muted">#8B8275</color>
+    <color name="polityk_line">#E5DCCC</color>
+    <color name="polityk_accent">#C66A4B</color>
+    <color name="polityk_accent_soft">#F3E0D6</color>
+</resources>

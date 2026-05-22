@@ -1,0 +1,66 @@
+{
+  "run_id": "00000000-0000-0000-0000-000000000001",
+  "model_version": "0.1.0-test",
+  "generated_at": "2026-05-22T12:00:00Z",
+  "race": {"type": "presidential", "cycle": 2027, "round": 1},
+  "candidates": [
+    {
+      "candidate_id": 42,
+      "name": "Bernardo Arévalo",
+      "wikidata_qid": "Q123",
+      "party_id": 17,
+      "party_name": "Movimiento Semilla",
+      "vote_share": {"p05": 0.12, "p10": 0.14, "p25": 0.18, "p50": 0.23, "p75": 0.28, "p90": 0.32, "p95": 0.34},
+      "win_probability_round1": 0.04,
+      "qualifies_for_runoff_probability": 0.62
+    },
+    {
+      "candidate_id": 11,
+      "name": "Sandra Torres",
+      "wikidata_qid": "Q456",
+      "party_id": 7,
+      "party_name": "UNE",
+      "vote_share": {"p05": 0.10, "p10": 0.12, "p25": 0.16, "p50": 0.20, "p75": 0.24, "p90": 0.28, "p95": 0.30},
+      "win_probability_round1": 0.02,
+      "qualifies_for_runoff_probability": 0.55
+    },
+    {
+      "candidate_id": 19,
+      "name": "Zury Ríos",
+      "wikidata_qid": "Q789",
+      "party_id": 3,
+      "party_name": "Valor",
+      "vote_share": {"p05": 0.07, "p10": 0.09, "p25": 0.11, "p50": 0.14, "p75": 0.17, "p90": 0.19, "p95": 0.21},
+      "win_probability_round1": 0.01,
+      "qualifies_for_runoff_probability": 0.31
+    },
+    {
+      "candidate_id": 23,
+      "name": "Edmond Mulet",
+      "wikidata_qid": null,
+      "party_id": 9,
+      "party_name": "Cabal",
+      "vote_share": {"p05": 0.05, "p10": 0.06, "p25": 0.08, "p50": 0.10, "p75": 0.12, "p90": 0.14, "p95": 0.16},
+      "win_probability_round1": 0.005,
+      "qualifies_for_runoff_probability": 0.18
+    },
+    {
+      "candidate_id": 31,
+      "name": "Manuel Conde",
+      "wikidata_qid": null,
+      "party_id": 1,
+      "party_name": "Vamos",
+      "vote_share": {"p05": 0.03, "p10": 0.04, "p25": 0.05, "p50": 0.07, "p75": 0.09, "p90": 0.11, "p95": 0.12},
+      "win_probability_round1": 0.001,
+      "qualifies_for_runoff_probability": 0.09
+    }
+  ],
+  "runoff_matrix": [
+    {"candidate_a_id": 42, "candidate_b_id": 11, "pair_probability": 0.31, "winner_a_probability": 0.61},
+    {"candidate_a_id": 42, "candidate_b_id": 19, "pair_probability": 0.18, "winner_a_probability": 0.55},
+    {"candidate_a_id": 11, "candidate_b_id": 19, "pair_probability": 0.12, "winner_a_probability": 0.47}
+  ],
+  "interventions_applied": [],
+  "methodology_url": "https://polityk.gt/methodology#presidential-0.1.0-test",
+  "cache_invalid_until": "2026-05-22T18:00:00Z"
+}
