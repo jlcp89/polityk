@@ -1,0 +1,20 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+
+[*.{kt,kts}]
+ij_kotlin_allow_trailing_comma = true
+ij_kotlin_allow_trailing_comma_on_call_site = true
+# Composable functions are conventionally PascalCase per Jetpack Compose API guidelines.
+ktlint_standard_function-naming = disabled
+# Function body expression wrapping is overly strict for builder-style DSLs.
+ktlint_standard_function-expression-body = disabled
+# Backtick-quoted test method names with spaces are idiomatic.
+ktlint_standard_no-blank-line-in-list = disabled
+# String-template-indent depends on multiline-expression-wrapping; keep both rules enabled.

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">polityk</string>
+    <string name="presidential_title">Pronóstico presidencial</string>
+    <string name="presidential_subtitle">Guatemala 2027 — primera vuelta</string>
+    <string name="state_loading">Cargando pronóstico…</string>
+    <string name="state_error_title">No pudimos cargar el pronóstico</string>
+    <string name="state_error_retry">Reintentar</string>
+    <string name="ci_80_label">Intervalo 80%%</string>
+    <string name="ci_95_label">Intervalo 95%%</string>
+    <string name="runoff_qualifies_label">Pasa a segunda elección</string>
+    <string name="win_round_1_label">Gana en primera elección</string>
+    <string name="model_version_label">Versión del modelo</string>
+    <string name="generated_at_label">Generado</string>
+</resources>
