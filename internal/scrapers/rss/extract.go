@@ -19,6 +19,10 @@ var articleBodySelectors = []string{
 	"article .article-content",
 	".entry-content",
 	".post-content",
+	".post_content",     // DCA WordPress "wesper" theme (underscore variant)
+	".jl_content",       // DCA fallback container
+	".single_content",   // Guatemala.com WordPress theme
+	".content_data",     // Guatemala.com fallback wrapper
 	".article-content",
 	".article__body",
 	"article",

@@ -16,6 +16,17 @@ graphify-out/
 # Go
 bin/
 *.exe
+# Compiled binaries dropped by `go build` at repo root
+/scrape-rss
+/scrape-rss-archive
+/api
+/blackout
+
+# Transient sentiment scaffolds (reproducible from sample_headlines.py)
+pipeline/sentiment/fixtures/headlines_labelled.scaffold.csv
+
+# Claude harness transient state
+.claude/scheduled_tasks.lock
 
 # Python
 .venv/

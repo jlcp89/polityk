@@ -42,9 +42,12 @@ type DirectConfig struct {
 	NormalizeHref func(string) string
 }
 
-// Sources returns the 10 outlets configured per docs/requirement.md Section
-// B. Prensa Libre exposes two feeds (general + politica); both are listed
-// under the single "Prensa Libre" outlet and deduplicated by URL.
+// Sources returns the active outlets. Originally 10 per
+// docs/requirement.md Section B; Soy502, Publinews and AGN were
+// disabled in 2026-05 because their RSS endpoints have been
+// decommissioned or never existed (see comments below). Prensa Libre
+// exposes two feeds (general + politica); both are listed under the
+// single "Prensa Libre" outlet and deduplicated by URL.
 //
 // Feed URLs are best-effort matches against feeds publicly indexed on each
 // outlet's site or curated lists; if an outlet flips a path the entry can
@@ -62,17 +65,14 @@ func Sources() []Outlet {
 			Name:     "La Hora",
 			FeedURLs: []string{"https://lahora.gt/feed/"},
 		},
-		{
-			Name:     "Soy502",
-			FeedURLs: []string{"https://www.soy502.com/rss.xml"},
-		},
+		// Soy502, Publinews, AGN — RSS endpoints decommissioned or never
+		// existed as of 2026-05. Soy502's /rss.xml and /feed/ both 200 with
+		// the Google consent shim instead of XML; Publinews returns 404 on
+		// every common feed path; AGN's /feed/ now 301s to the homepage.
+		// Re-enable only after confirming a working XML endpoint.
 		{
 			Name:     "Plaza Pública",
-			FeedURLs: []string{"https://www.plazapublica.com.gt/rss.xml"},
-		},
-		{
-			Name:     "Publinews",
-			FeedURLs: []string{"https://www.publinews.gt/rss/"},
+			FeedURLs: []string{"https://plazapublica.com.gt/feed/"},
 		},
 		{
 			Name:     "Emisoras Unidas",
@@ -83,12 +83,8 @@ func Sources() []Outlet {
 			FeedURLs: []string{"https://republica.gt/feed/"},
 		},
 		{
-			Name:     "Agencia Guatemalteca de Noticias",
-			FeedURLs: []string{"https://agn.gt/feed/"},
-		},
-		{
 			Name:     "Guatemala.com",
-			FeedURLs: []string{"https://aprende.guatemala.com/feed/"},
+			FeedURLs: []string{"https://www.guatemala.com/feed/"},
 		},
 		{
 			Name: "Diario de Centro América",

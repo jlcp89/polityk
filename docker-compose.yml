@@ -1,0 +1,31 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: polityk-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: polityk
+      POSTGRES_PASSWORD: polityk
+      POSTGRES_DB: polityk
+    ports:
+      - "127.0.0.1:5435:5432"
+    volumes:
+      - polityk_pgdata:/var/lib/postgresql/data
+    command:
+      - postgres
+      - -c
+      - shared_buffers=256MB
+      - -c
+      - work_mem=16MB
+      - -c
+      - maintenance_work_mem=128MB
+      - -c
+      - effective_cache_size=512MB
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U polityk -d polityk"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  polityk_pgdata:

@@ -136,22 +136,31 @@ def score(
     )
 
 
-def _build_default_resolver() -> EntityResolver:
+def _build_default_resolver(module_name: str | None = None) -> EntityResolver:
     """Build the resolver used when the harness runs standalone.
 
-    Imports the smoke-test fixture so the script works out-of-the-box
-    against `headlines_smoke.csv`. Production callers should construct
-    their own `EntityResolver.from_db_rows(...)`.
-    """
-    from pipeline.sentiment.fixtures.gazetteer_2023 import (
-        build_fixture_cycle_candidate_for_party,
-        build_fixture_gazetteer,
-    )
+    Default imports the smoke-test fixture (`gazetteer_2023`) so the
+    script works out-of-the-box against `headlines_smoke.csv`. Pass
+    `module_name="pipeline.sentiment.fixtures.gazetteer_2027"` to validate
+    against the issue #26 launch gate fixture. Production callers should
+    construct their own `EntityResolver.from_db_rows(...)`.
 
-    return EntityResolver(
-        build_fixture_gazetteer(),
-        build_fixture_cycle_candidate_for_party(),
-    )
+    The fixture module must expose either
+    `build_gazetteer() + build_cycle_candidate_for_party()` (gazetteer_2027)
+    or the legacy `build_fixture_gazetteer() +
+    build_fixture_cycle_candidate_for_party()` (gazetteer_2023).
+    """
+    import importlib
+
+    target = module_name or "pipeline.sentiment.fixtures.gazetteer_2023"
+    mod = importlib.import_module(target)
+    if hasattr(mod, "build_gazetteer"):
+        gaz = mod.build_gazetteer()
+        cycle = mod.build_cycle_candidate_for_party()
+    else:
+        gaz = mod.build_fixture_gazetteer()
+        cycle = mod.build_fixture_cycle_candidate_for_party()
+    return EntityResolver(gaz, cycle)
 
 
 def _select_csv_path(csv_arg: str | None) -> Path | None:
@@ -174,6 +183,15 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--csv", help="Path to labelled headline CSV.", default=None)
     parser.add_argument(
+        "--gazetteer-module",
+        default=None,
+        help=(
+            "Python module path of the gazetteer fixture to use. Defaults to "
+            "gazetteer_2023 (smoke). Pass "
+            "pipeline.sentiment.fixtures.gazetteer_2027 for the #26 launch gate."
+        ),
+    )
+    parser.add_argument(
         "--threshold",
         type=float,
         default=DEFAULT_F1_THRESHOLD,
@@ -195,7 +213,7 @@ def main(argv: list[str] | None = None) -> int:
         logger.error("Failed to load CSV: %s", exc)
         return 2
 
-    resolver = _build_default_resolver()
+    resolver = _build_default_resolver(args.gazetteer_module)
     report = score(resolver, headlines)
     logger.info(
         "validate_entity_resolver: n=%d tp=%d fp=%d fn=%d "

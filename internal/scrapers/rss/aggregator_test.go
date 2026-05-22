@@ -145,7 +145,7 @@ func (r *fixtureRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		}
 		return
 	case strings.Contains(host, "plazapublica.com.gt"):
-		if strings.HasSuffix(path, "/rss.xml") {
+		if strings.HasSuffix(path, "/feed/") {
 			r.writeFixture(w, "plaza_publica.xml")
 		} else {
 			r.writeFixture(w, "article_sample.html")
@@ -257,10 +257,13 @@ func newFixtureClient(t *testing.T, srv *httptest.Server, outlets []Outlet, minD
 
 // --- Pure / fast tests below. ---
 
-func TestSources_TenOutletsAndDCADirect(t *testing.T) {
+func TestSources_ActiveOutletsAndDCADirect(t *testing.T) {
 	t.Parallel()
 	outlets := Sources()
-	if got, want := len(outlets), 10; got != want {
+	// 6 working RSS outlets + 1 Direct (DCA) = 7. Soy502, Publinews, AGN
+	// were removed in 2026-05 after their RSS endpoints stopped serving
+	// XML; see sources.go for the rationale.
+	if got, want := len(outlets), 7; got != want {
 		t.Fatalf("Sources(): got %d outlets, want %d", got, want)
 	}
 	directCount := 0
@@ -285,8 +288,8 @@ func TestSources_TenOutletsAndDCADirect(t *testing.T) {
 	if directCount != 1 {
 		t.Errorf("expected exactly one Direct outlet (DCA), got %d", directCount)
 	}
-	if feedCount != 9 {
-		t.Errorf("expected 9 RSS outlets, got %d", feedCount)
+	if feedCount != 6 {
+		t.Errorf("expected 6 RSS outlets, got %d", feedCount)
 	}
 	// Spot-check: DCA must be the Direct outlet.
 	for _, o := range outlets {
