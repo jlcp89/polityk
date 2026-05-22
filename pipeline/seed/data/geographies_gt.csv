@@ -1,0 +1,388 @@
+level,code,name,parent_code,parent_level
+country,GT,Guatemala,,
+country,GT-PARLACEN,Nacional (PARLACEN),,
+department,01,Guatemala,GT,country
+department,02,El Progreso,GT,country
+department,03,Sacatepéquez,GT,country
+department,04,Chimaltenango,GT,country
+department,05,Escuintla,GT,country
+department,06,Santa Rosa,GT,country
+department,07,Sololá,GT,country
+department,08,Totonicapán,GT,country
+department,09,Quetzaltenango,GT,country
+department,10,Suchitepéquez,GT,country
+department,11,Retalhuleu,GT,country
+department,12,San Marcos,GT,country
+department,13,Huehuetenango,GT,country
+department,14,Quiché,GT,country
+department,15,Baja Verapaz,GT,country
+department,16,Alta Verapaz,GT,country
+department,17,Petén,GT,country
+department,18,Izabal,GT,country
+department,19,Zacapa,GT,country
+department,20,Chiquimula,GT,country
+department,21,Jalapa,GT,country
+department,22,Jutiapa,GT,country
+district,D-GT-CENTRAL,Distrito Central,01,department
+district,D-GT-GUATEMALA,Distrito de Guatemala,01,department
+district,D-EP,El Progreso,02,department
+district,D-SA,Sacatepéquez,03,department
+district,D-CM,Chimaltenango,04,department
+district,D-ES,Escuintla,05,department
+district,D-SR,Santa Rosa,06,department
+district,D-SO,Sololá,07,department
+district,D-TO,Totonicapán,08,department
+district,D-QZ,Quetzaltenango,09,department
+district,D-SU,Suchitepéquez,10,department
+district,D-RE,Retalhuleu,11,department
+district,D-SM,San Marcos,12,department
+district,D-HU,Huehuetenango,13,department
+district,D-QC,Quiché,14,department
+district,D-BV,Baja Verapaz,15,department
+district,D-AV,Alta Verapaz,16,department
+district,D-PE,Petén,17,department
+district,D-IZ,Izabal,18,department
+district,D-ZA,Zacapa,19,department
+district,D-CQ,Chiquimula,20,department
+district,D-JA,Jalapa,21,department
+district,D-JU,Jutiapa,22,department
+municipality,0101,Guatemala,01,department
+municipality,0102,Santa Catarina Pinula,01,department
+municipality,0103,San José Pinula,01,department
+municipality,0104,San José del Golfo,01,department
+municipality,0105,Palencia,01,department
+municipality,0106,Chinautla,01,department
+municipality,0107,San Pedro Ayampuc,01,department
+municipality,0108,Mixco,01,department
+municipality,0109,San Pedro Sacatepéquez,01,department
+municipality,0110,San Juan Sacatepéquez,01,department
+municipality,0111,San Raymundo,01,department
+municipality,0112,Chuarrancho,01,department
+municipality,0113,Fraijanes,01,department
+municipality,0114,Amatitlán,01,department
+municipality,0115,Villa Nueva,01,department
+municipality,0116,Villa Canales,01,department
+municipality,0117,San Miguel Petapa,01,department
+municipality,0201,Guastatoya,02,department
+municipality,0202,Morazán,02,department
+municipality,0203,San Agustín Acasaguastlán,02,department
+municipality,0204,San Cristóbal Acasaguastlán,02,department
+municipality,0205,El Jícaro,02,department
+municipality,0206,Sansare,02,department
+municipality,0207,Sanarate,02,department
+municipality,0208,San Antonio La Paz,02,department
+municipality,0301,Antigua Guatemala,03,department
+municipality,0302,Jocotenango,03,department
+municipality,0303,Pastores,03,department
+municipality,0304,Sumpango,03,department
+municipality,0305,Santo Domingo Xenacoj,03,department
+municipality,0306,Santiago Sacatepéquez,03,department
+municipality,0307,San Bartolomé Milpas Altas,03,department
+municipality,0308,San Lucas Sacatepéquez,03,department
+municipality,0309,Santa Lucía Milpas Altas,03,department
+municipality,0310,Magdalena Milpas Altas,03,department
+municipality,0311,Santa María de Jesús,03,department
+municipality,0312,Ciudad Vieja,03,department
+municipality,0313,San Miguel Dueñas,03,department
+municipality,0314,Alotenango,03,department
+municipality,0315,San Antonio Aguas Calientes,03,department
+municipality,0316,Santa Catarina Barahona,03,department
+municipality,0401,Chimaltenango,04,department
+municipality,0402,San José Poaquil,04,department
+municipality,0403,San Martín Jilotepeque,04,department
+municipality,0404,Comalapa,04,department
+municipality,0405,Santa Apolonia,04,department
+municipality,0406,Tecpán Guatemala,04,department
+municipality,0407,Patzún,04,department
+municipality,0408,Pochuta,04,department
+municipality,0409,Patzicía,04,department
+municipality,0410,Santa Cruz Balanyá,04,department
+municipality,0411,Acatenango,04,department
+municipality,0412,Yepocapa,04,department
+municipality,0413,San Andrés Itzapa,04,department
+municipality,0414,Parramos,04,department
+municipality,0415,Zaragoza,04,department
+municipality,0416,El Tejar,04,department
+municipality,0501,Escuintla,05,department
+municipality,0502,Santa Lucía Cotzumalguapa,05,department
+municipality,0503,La Democracia,05,department
+municipality,0504,Siquinalá,05,department
+municipality,0505,Masagua,05,department
+municipality,0506,Tiquisate,05,department
+municipality,0507,La Gomera,05,department
+municipality,0508,Guanagazapa,05,department
+municipality,0509,San José,05,department
+municipality,0510,Iztapa,05,department
+municipality,0511,Palín,05,department
+municipality,0512,San Vicente Pacaya,05,department
+municipality,0513,Nueva Concepción,05,department
+municipality,0514,Sipacate,05,department
+municipality,0601,Cuilapa,06,department
+municipality,0602,Barberena,06,department
+municipality,0603,Santa Rosa de Lima,06,department
+municipality,0604,Casillas,06,department
+municipality,0605,San Rafael Las Flores,06,department
+municipality,0606,Oratorio,06,department
+municipality,0607,San Juan Tecuaco,06,department
+municipality,0608,Chiquimulilla,06,department
+municipality,0609,Taxisco,06,department
+municipality,0610,Santa María Ixhuatán,06,department
+municipality,0611,Guazacapán,06,department
+municipality,0612,Santa Cruz Naranjo,06,department
+municipality,0613,Pueblo Nuevo Viñas,06,department
+municipality,0614,Nueva Santa Rosa,06,department
+municipality,0701,Sololá,07,department
+municipality,0702,San José Chacayá,07,department
+municipality,0703,Santa María Visitación,07,department
+municipality,0704,Santa Lucía Utatlán,07,department
+municipality,0705,Nahualá,07,department
+municipality,0706,Santa Catarina Ixtahuacán,07,department
+municipality,0707,Santa Clara La Laguna,07,department
+municipality,0708,Concepción,07,department
+municipality,0709,San Andrés Semetabaj,07,department
+municipality,0710,Panajachel,07,department
+municipality,0711,Santa Catarina Palopó,07,department
+municipality,0712,San Antonio Palopó,07,department
+municipality,0713,San Lucas Tolimán,07,department
+municipality,0714,Santa Cruz La Laguna,07,department
+municipality,0715,San Pablo La Laguna,07,department
+municipality,0716,San Marcos La Laguna,07,department
+municipality,0717,San Juan La Laguna,07,department
+municipality,0718,San Pedro La Laguna,07,department
+municipality,0719,Santiago Atitlán,07,department
+municipality,0801,Totonicapán,08,department
+municipality,0802,San Cristóbal Totonicapán,08,department
+municipality,0803,San Francisco El Alto,08,department
+municipality,0804,San Andrés Xecul,08,department
+municipality,0805,Momostenango,08,department
+municipality,0806,Santa María Chiquimula,08,department
+municipality,0807,Santa Lucía La Reforma,08,department
+municipality,0808,San Bartolo Aguas Calientes,08,department
+municipality,0901,Quetzaltenango,09,department
+municipality,0902,Salcajá,09,department
+municipality,0903,Olintepeque,09,department
+municipality,0904,San Carlos Sija,09,department
+municipality,0905,Sibilia,09,department
+municipality,0906,Cabricán,09,department
+municipality,0907,Cajolá,09,department
+municipality,0908,San Miguel Sigüilá,09,department
+municipality,0909,Ostuncalco,09,department
+municipality,0910,San Mateo,09,department
+municipality,0911,Concepción Chiquirichapa,09,department
+municipality,0912,San Martín Sacatepéquez,09,department
+municipality,0913,Almolonga,09,department
+municipality,0914,Cantel,09,department
+municipality,0915,Huitán,09,department
+municipality,0916,Zunil,09,department
+municipality,0917,Colomba Costa Cuca,09,department
+municipality,0918,San Francisco La Unión,09,department
+municipality,0919,El Palmar,09,department
+municipality,0920,Coatepeque,09,department
+municipality,0921,Génova,09,department
+municipality,0922,Flores Costa Cuca,09,department
+municipality,0923,La Esperanza,09,department
+municipality,0924,Palestina de Los Altos,09,department
+municipality,1001,Mazatenango,10,department
+municipality,1002,Cuyotenango,10,department
+municipality,1003,San Francisco Zapotitlán,10,department
+municipality,1004,San Bernardino,10,department
+municipality,1005,San José El Ídolo,10,department
+municipality,1006,Santo Domingo Suchitepéquez,10,department
+municipality,1007,San Lorenzo,10,department
+municipality,1008,Samayac,10,department
+municipality,1009,San Pablo Jocopilas,10,department
+municipality,1010,San Antonio Suchitepéquez,10,department
+municipality,1011,San Miguel Panán,10,department
+municipality,1012,San Gabriel,10,department
+municipality,1013,Chicacao,10,department
+municipality,1014,Patulul,10,department
+municipality,1015,Santa Bárbara,10,department
+municipality,1016,San Juan Bautista,10,department
+municipality,1017,Santo Tomás La Unión,10,department
+municipality,1018,Zunilito,10,department
+municipality,1019,Pueblo Nuevo,10,department
+municipality,1020,Río Bravo,10,department
+municipality,1021,San José La Máquina,10,department
+municipality,1101,Retalhuleu,11,department
+municipality,1102,San Sebastián,11,department
+municipality,1103,Santa Cruz Muluá,11,department
+municipality,1104,San Martín Zapotitlán,11,department
+municipality,1105,San Felipe,11,department
+municipality,1106,San Andrés Villa Seca,11,department
+municipality,1107,Champerico,11,department
+municipality,1108,Nuevo San Carlos,11,department
+municipality,1109,El Asintal,11,department
+municipality,1201,San Marcos,12,department
+municipality,1202,San Pedro Sacatepéquez (SM),12,department
+municipality,1203,San Antonio Sacatepéquez,12,department
+municipality,1204,Comitancillo,12,department
+municipality,1205,San Miguel Ixtahuacán,12,department
+municipality,1206,Concepción Tutuapa,12,department
+municipality,1207,Tacaná,12,department
+municipality,1208,Sibinal,12,department
+municipality,1209,Tajumulco,12,department
+municipality,1210,Tejutla,12,department
+municipality,1211,San Rafael Pie de la Cuesta,12,department
+municipality,1212,Nuevo Progreso,12,department
+municipality,1213,El Tumbador,12,department
+municipality,1214,El Rodeo,12,department
+municipality,1215,Malacatán,12,department
+municipality,1216,Catarina,12,department
+municipality,1217,Ayutla,12,department
+municipality,1218,Ocós,12,department
+municipality,1219,San Pablo,12,department
+municipality,1220,El Quetzal,12,department
+municipality,1221,La Reforma,12,department
+municipality,1222,Pajapita,12,department
+municipality,1223,Ixchiguán,12,department
+municipality,1224,San José Ojetenam,12,department
+municipality,1225,San Cristóbal Cucho,12,department
+municipality,1226,Sipacapa,12,department
+municipality,1227,Esquipulas Palo Gordo,12,department
+municipality,1228,Río Blanco,12,department
+municipality,1229,San Lorenzo (SM),12,department
+municipality,1230,La Blanca,12,department
+municipality,1301,Huehuetenango,13,department
+municipality,1302,Chiantla,13,department
+municipality,1303,Malacatancito,13,department
+municipality,1304,Cuilco,13,department
+municipality,1305,Nentón,13,department
+municipality,1306,San Pedro Necta,13,department
+municipality,1307,Jacaltenango,13,department
+municipality,1308,Soloma,13,department
+municipality,1309,Ixtahuacán,13,department
+municipality,1310,Santa Bárbara (HU),13,department
+municipality,1311,La Libertad (HU),13,department
+municipality,1312,La Democracia (HU),13,department
+municipality,1313,San Miguel Acatán,13,department
+municipality,1314,San Rafael La Independencia,13,department
+municipality,1315,Todos Santos Cuchumatán,13,department
+municipality,1316,San Juan Atitán,13,department
+municipality,1317,Santa Eulalia,13,department
+municipality,1318,San Mateo Ixtatán,13,department
+municipality,1319,Colotenango,13,department
+municipality,1320,San Sebastián Huehuetenango,13,department
+municipality,1321,Tectitán,13,department
+municipality,1322,Concepción Huista,13,department
+municipality,1323,San Juan Ixcoy,13,department
+municipality,1324,San Antonio Huista,13,department
+municipality,1325,San Sebastián Coatán,13,department
+municipality,1326,Santa Cruz Barillas,13,department
+municipality,1327,Aguacatán,13,department
+municipality,1328,San Rafael Petzal,13,department
+municipality,1329,San Gaspar Ixchil,13,department
+municipality,1330,Santiago Chimaltenango,13,department
+municipality,1331,Santa Ana Huista,13,department
+municipality,1332,Unión Cantinil,13,department
+municipality,1333,Petatán,13,department
+municipality,1401,Santa Cruz del Quiché,14,department
+municipality,1402,Chiché,14,department
+municipality,1403,Chinique,14,department
+municipality,1404,Zacualpa,14,department
+municipality,1405,Chajul,14,department
+municipality,1406,Chichicastenango,14,department
+municipality,1407,Patzité,14,department
+municipality,1408,San Antonio Ilotenango,14,department
+municipality,1409,San Pedro Jocopilas,14,department
+municipality,1410,Cunén,14,department
+municipality,1411,San Juan Cotzal,14,department
+municipality,1412,Joyabaj,14,department
+municipality,1413,Nebaj,14,department
+municipality,1414,San Andrés Sajcabajá,14,department
+municipality,1415,Uspantán,14,department
+municipality,1416,Sacapulas,14,department
+municipality,1417,San Bartolomé Jocotenango,14,department
+municipality,1418,Canillá,14,department
+municipality,1419,Chicamán,14,department
+municipality,1420,Ixcán,14,department
+municipality,1421,Pachalum,14,department
+municipality,1501,Salamá,15,department
+municipality,1502,San Miguel Chicaj,15,department
+municipality,1503,Rabinal,15,department
+municipality,1504,Cubulco,15,department
+municipality,1505,Granados,15,department
+municipality,1506,El Chol,15,department
+municipality,1507,San Jerónimo,15,department
+municipality,1508,Purulhá,15,department
+municipality,1601,Cobán,16,department
+municipality,1602,Santa Cruz Verapaz,16,department
+municipality,1603,San Cristóbal Verapaz,16,department
+municipality,1604,Tactic,16,department
+municipality,1605,Tamahú,16,department
+municipality,1606,Tucurú,16,department
+municipality,1607,Panzós,16,department
+municipality,1608,Senahú,16,department
+municipality,1609,San Pedro Carchá,16,department
+municipality,1610,San Juan Chamelco,16,department
+municipality,1611,Lanquín,16,department
+municipality,1612,Cahabón,16,department
+municipality,1613,Chisec,16,department
+municipality,1614,Chahal,16,department
+municipality,1615,Fray Bartolomé de las Casas,16,department
+municipality,1616,Santa Catalina La Tinta,16,department
+municipality,1617,Raxruhá,16,department
+municipality,1701,Flores,17,department
+municipality,1702,San José (PE),17,department
+municipality,1703,San Benito,17,department
+municipality,1704,San Andrés,17,department
+municipality,1705,La Libertad,17,department
+municipality,1706,San Francisco,17,department
+municipality,1707,Santa Ana,17,department
+municipality,1708,Dolores,17,department
+municipality,1709,San Luis,17,department
+municipality,1710,Sayaxché,17,department
+municipality,1711,Melchor de Mencos,17,department
+municipality,1712,Poptún,17,department
+municipality,1713,Las Cruces,17,department
+municipality,1714,El Chal,17,department
+municipality,1801,Puerto Barrios,18,department
+municipality,1802,Livingston,18,department
+municipality,1803,El Estor,18,department
+municipality,1804,Morales,18,department
+municipality,1805,Los Amates,18,department
+municipality,1901,Zacapa,19,department
+municipality,1902,Estanzuela,19,department
+municipality,1903,Río Hondo,19,department
+municipality,1904,Gualán,19,department
+municipality,1905,Teculután,19,department
+municipality,1906,Usumatlán,19,department
+municipality,1907,Cabañas,19,department
+municipality,1908,San Diego,19,department
+municipality,1909,La Unión,19,department
+municipality,1910,Huité,19,department
+municipality,1911,San Jorge,19,department
+municipality,2001,Chiquimula,20,department
+municipality,2002,San José La Arada,20,department
+municipality,2003,San Juan Ermita,20,department
+municipality,2004,Jocotán,20,department
+municipality,2005,Camotán,20,department
+municipality,2006,Olopa,20,department
+municipality,2007,Esquipulas,20,department
+municipality,2008,Concepción Las Minas,20,department
+municipality,2009,Quezaltepeque,20,department
+municipality,2010,San Jacinto,20,department
+municipality,2011,Ipala,20,department
+municipality,2101,Jalapa,21,department
+municipality,2102,San Pedro Pinula,21,department
+municipality,2103,San Luis Jilotepeque,21,department
+municipality,2104,San Manuel Chaparrón,21,department
+municipality,2105,San Carlos Alzatate,21,department
+municipality,2106,Monjas,21,department
+municipality,2107,Mataquescuintla,21,department
+municipality,2201,Jutiapa,22,department
+municipality,2202,El Progreso (JU),22,department
+municipality,2203,Santa Catarina Mita,22,department
+municipality,2204,Agua Blanca,22,department
+municipality,2205,Asunción Mita,22,department
+municipality,2206,Yupiltepeque,22,department
+municipality,2207,Atescatempa,22,department
+municipality,2208,Jerez,22,department
+municipality,2209,El Adelanto,22,department
+municipality,2210,Zapotitlán,22,department
+municipality,2211,Comapa,22,department
+municipality,2212,Jalpatagua,22,department
+municipality,2213,Conguaco,22,department
+municipality,2214,Moyuta,22,department
+municipality,2215,Pasaco,22,department
+municipality,2216,San José Acatempa,22,department
+municipality,2217,Quesada,22,department

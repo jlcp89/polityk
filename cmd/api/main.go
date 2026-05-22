@@ -1,12 +1,14 @@
 // Command api serves the polityk JSON HTTP API.
 //
-// v1 scaffolding (issue #1): wires net/http + log/slog and a static
-// /v1/health endpoint. No database is required to start the server —
-// real health checks land in issue #14.
+// v1 scaffolding (issue #1, extended in #2): wires net/http + log/slog and
+// the /v1/health endpoint. When DATABASE_URL is set the health endpoint
+// also reports `db_dimensions_seeded`. When it isn't set, the API still
+// starts so contributors can run it without Postgres in the loop.
 package main
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"log/slog"
 	"net/http"
@@ -15,8 +17,11 @@ import (
 	"syscall"
 	"time"
 
+	_ "github.com/jackc/pgx/v5/stdlib"
+
 	"github.com/jlcp89/polityk/internal/handlers"
 	"github.com/jlcp89/polityk/internal/middleware"
+	"github.com/jlcp89/polityk/internal/store"
 )
 
 func main() {
@@ -28,8 +33,26 @@ func main() {
 		addr = ":8080"
 	}
 
+	var checker handlers.DimensionsChecker
+	if dsn := os.Getenv("DATABASE_URL"); dsn != "" {
+		db, err := sql.Open("pgx", dsn)
+		if err != nil {
+			logger.Error("db_open_failed", "err", err)
+			os.Exit(1)
+		}
+		defer func() {
+			if cerr := db.Close(); cerr != nil {
+				logger.Warn("db_close_failed", "err", cerr)
+			}
+		}()
+		checker = &store.DimensionsChecker{DB: db}
+		logger.Info("db_connected")
+	} else {
+		logger.Info("db_skipped_no_dsn")
+	}
+
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /v1/health", handlers.Health)
+	mux.HandleFunc("GET /v1/health", handlers.NewHealth(checker))
 
 	// Forecast routes are blackout-gated per ADR-003. Handlers registered
 	// on forecastMux automatically inherit the 503 short-circuit when
