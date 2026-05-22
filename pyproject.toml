@@ -79,5 +79,7 @@ module = [
     "telethon.*",
     "atproto",
     "atproto.*",
+    "pysentimiento",
+    "pysentimiento.*",
 ]
 ignore_missing_imports = true
