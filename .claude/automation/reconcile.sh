@@ -70,8 +70,15 @@ for n in "${CLOSED[@]}"; do
     # branches look like orphans by SHA-ancestry but the WORK is already in
     # main. We classify them separately so --apply doesn't try to re-merge
     # stale code that will conflict by definition.
-    if git log --format='%s' main \
-        | grep -qiE "^(Issue|merge: issue) #${n}([^0-9]|$)"; then
+    #
+    # Capture into a variable instead of `git log | grep -q ...` because
+    # `set -o pipefail` + `grep -q` exits early and causes git log to take
+    # SIGPIPE (exit 141), which pipefail propagates as a pipeline failure
+    # even when the regex matched.
+    phantom_hit="$(git log --format='%s' main \
+        | grep -iE "^(Issue|merge: issue) #${n}([^0-9]|$)" \
+        | head -1 || true)"
+    if [ -n "$phantom_hit" ]; then
         PHANTOMS+=("$n")
         continue
     fi
