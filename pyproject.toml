@@ -5,6 +5,7 @@ description = "Python ML + scraping pipeline for polityk (Guatemala 2027 electio
 requires-python = ">=3.11,<3.13"
 dependencies = [
   "psycopg[binary]>=3.2",
+  "openpyxl>=3.1",
 ]
 
 [project.optional-dependencies]
@@ -12,6 +13,7 @@ dev = [
   "pytest>=8.0",
   "ruff>=0.6",
   "mypy>=1.11",
+  "types-openpyxl>=3.1",
 ]
 
 [build-system]
