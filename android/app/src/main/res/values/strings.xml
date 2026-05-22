@@ -37,4 +37,10 @@
     <string name="banner_stale">Datos antiguos — actualizados hace %d h</string>
     <string name="no_recent_data_title">Sin conexión reciente</string>
     <string name="no_recent_data_body">No pudimos obtener un pronóstico reciente. Conéctate a la red y vuelve a intentarlo.</string>
+    <string name="tab_presidential">Presidencial</string>
+    <string name="tab_congress">Congreso</string>
+    <string name="tab_municipal">Municipal</string>
+    <string name="tab_coming_soon">Próximamente disponible.</string>
+    <string name="congress_title">Pronóstico del Congreso</string>
+    <string name="municipal_title">Pronóstico municipal</string>
 </resources>
