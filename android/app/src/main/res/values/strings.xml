@@ -32,4 +32,9 @@
     <string name="methodology_pollster_table_header">Sesgo medio · σ · n</string>
     <string name="methodology_open_long_form">Leer el documento</string>
     <string name="methodology_long_form_url_label">URL</string>
+    <string name="last_updated_hours">Actualizado hace %d horas</string>
+    <string name="banner_slightly_stale">Datos posiblemente desactualizados (hace %d h)</string>
+    <string name="banner_stale">Datos antiguos — actualizados hace %d h</string>
+    <string name="no_recent_data_title">Sin conexión reciente</string>
+    <string name="no_recent_data_body">No pudimos obtener un pronóstico reciente. Conéctate a la red y vuelve a intentarlo.</string>
 </resources>

@@ -29,7 +29,7 @@ class PresidentialScreenTest {
         composeRule.setContent {
             PolitykTheme {
                 PresidentialScreen(
-                    state = PresidentialUiState.Ready(payload),
+                    state = PresidentialUiState.Fresh(payload, ageHours = 1L),
                     onRetry = {},
                 )
             }
@@ -75,7 +75,7 @@ class PresidentialScreenTest {
             composeRule.setContent {
                 PolitykTheme {
                     PresidentialScreen(
-                        state = PresidentialUiState.Ready(mutated),
+                        state = PresidentialUiState.Fresh(mutated, ageHours = 1L),
                         onRetry = {},
                         clock = clock,
                         onOpenMethodology = {},
@@ -93,7 +93,7 @@ class PresidentialScreenTest {
         composeRule.setContent {
             PolitykTheme {
                 PresidentialScreen(
-                    state = PresidentialUiState.Ready(fivePresidentialCandidatesFixture()),
+                    state = PresidentialUiState.Fresh(fivePresidentialCandidatesFixture(), ageHours = 1L),
                     onRetry = {},
                 )
             }
