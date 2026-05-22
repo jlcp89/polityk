@@ -12,4 +12,21 @@
     <string name="win_round_1_label">Gana en primera elección</string>
     <string name="model_version_label">Versión del modelo</string>
     <string name="generated_at_label">Generado</string>
+    <string name="run_id_label">ID de corrida</string>
+    <string name="last_updated_label">Actualizado</string>
+    <string name="open_methodology_content_description">Abrir metodología</string>
+    <string name="back_content_description">Volver</string>
+    <string name="methodology_title">Metodología</string>
+    <string name="methodology_subtitle">Cómo construimos este pronóstico</string>
+    <string name="methodology_section_model_version">Versión y corrida</string>
+    <string name="methodology_section_generated_at">Última actualización</string>
+    <string name="methodology_section_pollster_bias">Sesgo histórico por casa encuestadora</string>
+    <string name="methodology_section_fundamentals">Variables de fundamentos</string>
+    <string name="methodology_section_sentiment">Sentimiento como insumo del modelo</string>
+    <string name="methodology_section_long_form">Documento completo</string>
+    <string name="methodology_sentiment_on">Activo (peso modelado &gt; 0)</string>
+    <string name="methodology_sentiment_off">Solo informativo (peso modelado = 0)</string>
+    <string name="methodology_pollster_table_header">Sesgo medio · σ · n</string>
+    <string name="methodology_open_long_form">Leer el documento</string>
+    <string name="methodology_long_form_url_label">URL</string>
 </resources>
