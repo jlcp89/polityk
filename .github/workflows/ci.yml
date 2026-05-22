@@ -82,6 +82,11 @@ jobs:
       - name: goose up (again)
         run: goose -dir migrations up
 
+      - name: integration tests (against migrated DB)
+        env:
+          POLITYK_TEST_DATABASE_URL: "postgres://polityk:polityk@localhost:5432/polityk_ci?sslmode=disable"
+        run: go test -race ./internal/store/...
+
   python:
     name: Python (uv sync)
     runs-on: ubuntu-latest
