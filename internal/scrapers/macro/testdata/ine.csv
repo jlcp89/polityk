@@ -1,0 +1,7 @@
+code,observed_at,value,unit
+# INE open-data export: homicide rate YoY + padrón counts.
+homicide_rate_yoy,2024-12-31,-3.1,percent
+homicide_rate_yoy,2025-06-30,-2.4,percent
+padron_total,2025-01-01,9412877,persons
+padron_men,2025-01-01,4521004,persons
+padron_women,2025-01-01,4891873,persons

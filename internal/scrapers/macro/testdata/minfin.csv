@@ -1,0 +1,5 @@
+code,observed_at,value,unit
+# MINFIN open-data export: fiscal-balance YoY (optional v1).
+fiscal_balance_yoy,2024-12-31,-1.7,percent_of_gdp
+fiscal_balance_yoy,2025-03-31,-1.4,percent_of_gdp
+public_debt_to_gdp,2024-12-31,29.8,percent
