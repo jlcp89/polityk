@@ -98,5 +98,7 @@ module = [
     "arviz.*",
     "pytensor",
     "pytensor.*",
+    "pysentimiento",
+    "pysentimiento.*",
 ]
 ignore_missing_imports = true
