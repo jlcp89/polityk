@@ -38,6 +38,16 @@ sentiment = [
 parsers = [
   "pdfplumber>=0.11",
 ]
+# Bayesian modelling stack (PyMC + ArviZ). Heavy install; kept optional so
+# the lighter scraping/scoring/parsing layers don't drag in pytensor.
+# Required by the #29 pollster-bias estimator and the downstream poll
+# aggregator (#30) / fundamentals (#31) / presidential combiner (#32).
+modelling = [
+  "pymc>=5.16",
+  "arviz>=0.20",
+  "numpy>=1.26",
+  "pandas>=2.2",
+]
 
 [build-system]
 requires = ["hatchling"]
@@ -49,6 +59,9 @@ packages = ["pipeline"]
 [tool.pytest.ini_options]
 testpaths = ["pipeline/tests"]
 addopts = "-ra"
+markers = [
+  "slow: tests that take >1s (e.g. PyMC NUTS fits); skip with -m 'not slow'",
+]
 
 [tool.ruff]
 target-version = "py311"
@@ -68,9 +81,9 @@ exclude = [
 ]
 
 # Optional-extras imports — only installed under specific extras
-# (`--extra sentiment`, `--extra social`). The pipeline guards each behind
-# a lazy import + helpful error message, so mypy can ignore them in the
-# baseline install.
+# (`--extra sentiment`, `--extra social`, `--extra modelling`). The pipeline
+# guards each behind a lazy import + helpful error message, so mypy can
+# ignore them in the baseline install.
 [[tool.mypy.overrides]]
 module = [
     "spacy",
@@ -79,5 +92,11 @@ module = [
     "telethon.*",
     "atproto",
     "atproto.*",
+    "pymc",
+    "pymc.*",
+    "arviz",
+    "arviz.*",
+    "pytensor",
+    "pytensor.*",
 ]
 ignore_missing_imports = true
