@@ -16,19 +16,37 @@ type DimensionsChecker interface {
 	DimensionsSeeded(ctx context.Context) (bool, error)
 }
 
-// NewHealth returns the /v1/health handler. If checker is nil the handler
-// reports only the static `{"status":"ok"}` payload — useful for boot before
-// the DB connection is wired in, and for tests that don't need a database.
-func NewHealth(checker DimensionsChecker) http.HandlerFunc {
+// FactsChecker reports whether the race-specific fact tables exist (i.e. the
+// 0003 migration has been applied). Issue #3 surfaces this on /v1/health as
+// `db_facts_ready` so contributors and the Android tab logic in #44 can
+// distinguish a pre-migration DB from a post-migration one.
+type FactsChecker interface {
+	FactsReady(ctx context.Context) (bool, error)
+}
+
+// NewHealth returns the /v1/health handler. Both checkers are optional;
+// passing nil for either omits the corresponding field — useful for boot
+// before the DB connection is wired in, and for tests that don't need a
+// database.
+func NewHealth(dims DimensionsChecker, facts FactsChecker) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		body := map[string]any{"status": "ok"}
-		if checker != nil {
-			seeded, err := checker.DimensionsSeeded(r.Context())
+		if dims != nil {
+			seeded, err := dims.DimensionsSeeded(r.Context())
 			if err != nil {
 				slog.Warn("health_dimensions_check_failed", "err", err)
 				body["db_dimensions_seeded"] = false
 			} else {
 				body["db_dimensions_seeded"] = seeded
+			}
+		}
+		if facts != nil {
+			ready, err := facts.FactsReady(r.Context())
+			if err != nil {
+				slog.Warn("health_facts_check_failed", "err", err)
+				body["db_facts_ready"] = false
+			} else {
+				body["db_facts_ready"] = ready
 			}
 		}
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -42,5 +60,5 @@ func NewHealth(checker DimensionsChecker) http.HandlerFunc {
 // Health is the static fallback handler used when no DB checker is wired.
 // Kept exported for callers that still reference it directly.
 func Health(w http.ResponseWriter, r *http.Request) {
-	NewHealth(nil).ServeHTTP(w, r)
+	NewHealth(nil, nil).ServeHTTP(w, r)
 }
