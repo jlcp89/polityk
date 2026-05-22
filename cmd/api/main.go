@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/jlcp89/polityk/internal/handlers"
+	"github.com/jlcp89/polityk/internal/middleware"
 )
 
 func main() {
@@ -29,6 +30,12 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /v1/health", handlers.Health)
+
+	// Forecast routes are blackout-gated per ADR-003. Handlers registered
+	// on forecastMux automatically inherit the 503 short-circuit when
+	// BLACKOUT_ENABLED flips on. Issue #9 registers the first real route.
+	forecastMux := http.NewServeMux()
+	mux.Handle("/v1/forecast/", middleware.Blackout(forecastMux))
 
 	srv := &http.Server{
 		Addr:              addr,
