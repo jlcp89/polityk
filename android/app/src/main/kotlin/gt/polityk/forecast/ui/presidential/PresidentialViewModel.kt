@@ -3,9 +3,11 @@ package gt.polityk.forecast.ui.presidential
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import gt.polityk.forecast.data.api.BlackoutException
 import gt.polityk.forecast.data.api.PresidentialPayload
 import gt.polityk.forecast.data.repo.CachedForecast
 import gt.polityk.forecast.data.repo.PresidentialRepository
+import gt.polityk.forecast.ui.blackout.BlackoutResumeCalculator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,11 +39,13 @@ class PresidentialViewModel
         }
 
         private suspend fun computeNextState(): PresidentialUiState =
-            runCatching { repository.fetch() }
-                .fold(
-                    onSuccess = { payload -> classifyFreshPayload(payload) },
-                    onFailure = { error -> fallbackToCache(error) },
-                )
+            try {
+                classifyFreshPayload(repository.fetch())
+            } catch (_: BlackoutException) {
+                PresidentialUiState.Blackout(BlackoutResumeCalculator.nextResumeInstant(clock))
+            } catch (error: Exception) {
+                fallbackToCache(error)
+            }
 
         private fun classifyFreshPayload(payload: PresidentialPayload): PresidentialUiState =
             bucketize(

@@ -8,6 +8,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import gt.polityk.forecast.BuildConfig
+import gt.polityk.forecast.data.api.BlackoutInterceptor
 import gt.polityk.forecast.data.api.MethodologyPayload
 import gt.polityk.forecast.data.api.PolitykApi
 import gt.polityk.forecast.data.api.PresidentialPayload
@@ -31,7 +32,11 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideBlackoutInterceptor(): BlackoutInterceptor = BlackoutInterceptor()
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(blackoutInterceptor: BlackoutInterceptor): OkHttpClient {
         val logging =
             HttpLoggingInterceptor().apply {
                 level =
@@ -44,6 +49,7 @@ object NetworkModule {
         return OkHttpClient.Builder()
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(20, TimeUnit.SECONDS)
+            .addInterceptor(blackoutInterceptor)
             .addInterceptor(logging)
             .build()
     }

@@ -17,6 +17,9 @@ interface ForecastCacheDao {
     @Query("SELECT * FROM forecast_cache WHERE endpointUrl = :url LIMIT 1")
     suspend fun get(url: String): ForecastCacheEntity?
 
+    @Query("DELETE FROM forecast_cache WHERE endpointUrl = :url")
+    suspend fun deleteByEndpoint(url: String)
+
     @Query("DELETE FROM forecast_cache")
     suspend fun clear()
 }
