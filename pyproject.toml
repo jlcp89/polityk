@@ -1,0 +1,38 @@
+[project]
+name = "polityk-pipeline"
+version = "0.0.1"
+description = "Python ML + scraping pipeline for polityk (Guatemala 2027 election forecast)"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+  "psycopg[binary]>=3.2",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "ruff>=0.6",
+  "mypy>=1.11",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["pipeline"]
+
+[tool.pytest.ini_options]
+testpaths = ["pipeline/tests"]
+addopts = "-ra"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["pipeline"]
