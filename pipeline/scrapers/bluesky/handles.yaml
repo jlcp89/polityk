@@ -1,0 +1,18 @@
+# Guatemalan Bluesky handles watched by the firehose filter (ADR-015).
+#
+# Each entry is the full handle as seen on bsky.app, without the leading "@".
+# When a handle is renamed or a new GT outlet joins, edit this file — the
+# scraper picks it up on next start, no code change required.
+#
+# Curation criteria (per ADR-015):
+#   - based in Guatemala or covering GT politics primarily
+#   - public account (not a personal DM-only profile)
+#   - Spanish-language content (auto language filter is the final gate; this
+#     list narrows the firehose to a tractable subset before lang check)
+handles:
+  - prensalibre.bsky.social
+  - soy502.bsky.social
+  - emisorasunidas.bsky.social
+  - republicagt.bsky.social
+  - lahoragt.bsky.social
+  - plazapublica.bsky.social

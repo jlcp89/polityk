@@ -1,0 +1,32 @@
+{
+  "channel": {
+    "username": "prensalibregt",
+    "label": "Prensa Libre"
+  },
+  "messages": [
+    {
+      "id": 481523,
+      "date": "2026-05-21T13:42:11+00:00",
+      "message": "Sandra Torres presenta su plan de gobierno frente a militantes de la UNE en la Ciudad de Guatemala.",
+      "peer_id": {"_": "PeerChannel", "channel_id": 1100200300}
+    },
+    {
+      "id": 481524,
+      "date": "2026-05-21T14:05:00+00:00",
+      "message": "El TSE confirma fechas oficiales del calendario electoral 2027.",
+      "peer_id": {"_": "PeerChannel", "channel_id": 1100200300}
+    },
+    {
+      "id": 481525,
+      "date": "2026-05-21T14:30:00+00:00",
+      "message": "",
+      "peer_id": {"_": "PeerChannel", "channel_id": 1100200300}
+    },
+    {
+      "id": 481526,
+      "date": "2026-05-21T14:55:00+00:00",
+      "message": "Bernardo Arévalo se reúne con la bancada del Movimiento Semilla.",
+      "peer_id": {"_": "PeerChannel", "channel_id": 1100200300}
+    }
+  ]
+}
