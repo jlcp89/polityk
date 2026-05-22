@@ -8,6 +8,7 @@ dependencies = [
   "pdfplumber>=0.11",
   "psycopg[binary]>=3.2",
   "openpyxl>=3.1",
+  "pyyaml>=6.0",
 ]
 
 [project.optional-dependencies]
@@ -16,6 +17,15 @@ dev = [
   "ruff>=0.6",
   "mypy>=1.11",
   "types-openpyxl>=3.1",
+  "types-PyYAML>=6.0",
+]
+# Live-API deps for the social scrapers (telethon for Telegram, atproto for
+# Bluesky). Kept optional because the unit tests don't touch the live APIs;
+# install with `uv sync --extra social` when running the scrapers against
+# real channels / firehose.
+social = [
+  "telethon>=1.36",
+  "atproto>=0.0.50",
 ]
 # Sentiment NER stack — heavy, kept optional. Install with `uv sync --extra sentiment`
 # and `python -m spacy download es_core_news_sm`. The entity resolver runs
@@ -56,3 +66,18 @@ exclude = [
   # generated PDF is what tests consume.
   "pipeline/parsers/fixtures/build_cid_gallup_fixture\\.py$",
 ]
+
+# Optional-extras imports — only installed under specific extras
+# (`--extra sentiment`, `--extra social`). The pipeline guards each behind
+# a lazy import + helpful error message, so mypy can ignore them in the
+# baseline install.
+[[tool.mypy.overrides]]
+module = [
+    "spacy",
+    "spacy.*",
+    "telethon",
+    "telethon.*",
+    "atproto",
+    "atproto.*",
+]
+ignore_missing_imports = true

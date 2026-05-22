@@ -1,0 +1,74 @@
+{
+  "events": [
+    {
+      "uri": "at://did:plc:abcdef1234567890/app.bsky.feed.post/3kxx2gtgt2c2a",
+      "cid": "bafyreigt1",
+      "author": {
+        "did": "did:plc:abcdef1234567890",
+        "handle": "prensalibre.bsky.social"
+      },
+      "record": {
+        "$type": "app.bsky.feed.post",
+        "text": "Sandra Torres anuncia su candidatura para las elecciones 2027 en Guatemala.",
+        "createdAt": "2026-05-21T15:00:00.000Z",
+        "langs": ["es"]
+      }
+    },
+    {
+      "uri": "at://did:plc:zzzzzz9999999999/app.bsky.feed.post/3kxx2gtgt2c2b",
+      "cid": "bafyreigt2",
+      "author": {
+        "did": "did:plc:zzzzzz9999999999",
+        "handle": "randomtech.bsky.social"
+      },
+      "record": {
+        "$type": "app.bsky.feed.post",
+        "text": "Just shipped a new Rust crate, super excited!",
+        "createdAt": "2026-05-21T15:01:00.000Z",
+        "langs": ["en"]
+      }
+    },
+    {
+      "uri": "at://did:plc:abcdef1234567890/app.bsky.feed.post/3kxx2gtgt2c2c",
+      "cid": "bafyreigt3",
+      "author": {
+        "did": "did:plc:abcdef1234567890",
+        "handle": "prensalibre.bsky.social"
+      },
+      "record": {
+        "$type": "app.bsky.feed.post",
+        "text": "Hello from a non-Spanish Prensa Libre experiment.",
+        "createdAt": "2026-05-21T15:02:00.000Z",
+        "langs": ["en"]
+      }
+    },
+    {
+      "uri": "at://did:plc:soy5020000000000/app.bsky.feed.post/3kxx2gtgt2c2d",
+      "cid": "bafyreigt4",
+      "author": {
+        "did": "did:plc:soy5020000000000",
+        "handle": "soy502.bsky.social"
+      },
+      "record": {
+        "$type": "app.bsky.feed.post",
+        "text": "El TSE publicó hoy el padrón electoral preliminar para 2027.",
+        "createdAt": "2026-05-21T15:03:00.000Z",
+        "langs": ["es", "es-GT"]
+      }
+    },
+    {
+      "uri": "at://did:plc:emisoras0000000/app.bsky.feed.post/3kxx2gtgt2c2e",
+      "cid": "bafyreigt5",
+      "author": {
+        "did": "did:plc:emisoras0000000",
+        "handle": "emisorasunidas.bsky.social"
+      },
+      "record": {
+        "$type": "app.bsky.feed.post",
+        "text": "",
+        "createdAt": "2026-05-21T15:04:00.000Z",
+        "langs": ["es"]
+      }
+    }
+  ]
+}
