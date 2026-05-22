@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Soy502</title>
+    <link>https://www.soy502.com/</link>
+    <description>Sample feed</description>
+    <item>
+      <title>Inscripciones de partidos en curso</title>
+      <link>https://www.soy502.com/articulo/inscripciones-2027</link>
+      <pubDate>Tue, 20 May 2026 11:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>

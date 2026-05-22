@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Guatemala.com</title>
+    <link>https://aprende.guatemala.com/</link>
+    <description>Sample feed</description>
+    <item>
+      <title>Historia: elecciones generales en Guatemala</title>
+      <link>https://aprende.guatemala.com/historia/elecciones-generales</link>
+      <pubDate>Mon, 19 May 2026 10:00:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>

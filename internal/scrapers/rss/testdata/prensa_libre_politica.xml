@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Prensa Libre — Política</title>
+    <link>https://www.prensalibre.com/guatemala/politica/</link>
+    <description>Política — sample feed</description>
+    <item>
+      <title>TSE publica calendario para elecciones 2027</title>
+      <link>https://www.prensalibre.com/guatemala/politica/articulo-2/</link>
+      <pubDate>Tue, 20 May 2026 09:30:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Partidos solicitan extensión del plazo de inscripción</title>
+      <link>https://www.prensalibre.com/guatemala/politica/articulo-3/</link>
+      <pubDate>Wed, 21 May 2026 16:45:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>
