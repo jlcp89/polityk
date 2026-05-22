@@ -54,16 +54,40 @@ mapfile -t CLOSED < <(
 )
 
 ORPHANS=()
+PHANTOMS=()   # closed-and-merged-via-different-SHA
 for n in "${CLOSED[@]}"; do
     branch="agent/issue-$n"
     # Skip if the agent branch doesn't exist upstream.
     git show-ref --quiet --verify "refs/remotes/origin/$branch" || continue
-    # Skip if the tip is already in main.
+    # Skip if the tip is already in main (true ancestor — direct merge).
     if git merge-base --is-ancestor "origin/$branch" main 2>/dev/null; then
+        continue
+    fi
+    # Phantom-orphan check: is there a commit on main whose subject starts
+    # with "Issue #N:" or contains "issue #N" in the merge subject? The AFK
+    # supervisor's conflict-resolve flow rewrites the branch then merges; the
+    # remote agent branch is left dangling at the pre-rewrite SHA. Such
+    # branches look like orphans by SHA-ancestry but the WORK is already in
+    # main. We classify them separately so --apply doesn't try to re-merge
+    # stale code that will conflict by definition.
+    if git log --format='%s' main \
+        | grep -qiE "^(Issue|merge: issue) #${n}([^0-9]|$)"; then
+        PHANTOMS+=("$n")
         continue
     fi
     ORPHANS+=("$n")
 done
+
+if [ "${#PHANTOMS[@]}" -gt 0 ]; then
+    echo "reconcile: ${#PHANTOMS[@]} phantom branch(es) (work already in main under a different SHA):"
+    for n in "${PHANTOMS[@]}"; do
+        branch="agent/issue-$n"
+        landed="$(git log --format='%h %s' main | grep -iE "^[0-9a-f]+ (Issue|merge: issue) #${n}([^0-9]|$)" | head -1)"
+        echo "  #$n → $branch (landed in main as: ${landed:-?})"
+    done
+    echo "          delete with: git push origin --delete agent/issue-<N>"
+    echo ""
+fi
 
 if [ "${#ORPHANS[@]}" -eq 0 ]; then
     echo "reconcile: all closed AFK issues are already merged ✓"
