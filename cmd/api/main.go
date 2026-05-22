@@ -35,6 +35,7 @@ func main() {
 
 	var dims handlers.DimensionsChecker
 	var facts handlers.FactsChecker
+	var forecasts handlers.ForecastReader
 	if dsn := os.Getenv("DATABASE_URL"); dsn != "" {
 		db, err := sql.Open("pgx", dsn)
 		if err != nil {
@@ -48,6 +49,7 @@ func main() {
 		}()
 		dims = &store.DimensionsChecker{DB: db}
 		facts = &store.FactsChecker{DB: db}
+		forecasts = &store.ForecastReader{DB: db}
 		logger.Info("db_connected")
 	} else {
 		logger.Info("db_skipped_no_dsn")
@@ -60,6 +62,7 @@ func main() {
 	// on forecastMux automatically inherit the 503 short-circuit when
 	// BLACKOUT_ENABLED flips on. Issue #9 registers the first real route.
 	forecastMux := http.NewServeMux()
+	forecastMux.HandleFunc("GET /v1/forecast/presidential", handlers.NewPresidentialForecast(forecasts))
 	mux.Handle("/v1/forecast/", middleware.Blackout(forecastMux))
 
 	srv := &http.Server{
