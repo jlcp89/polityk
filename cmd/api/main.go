@@ -60,7 +60,9 @@ func main() {
 
 	// Forecast routes are blackout-gated per ADR-003. Handlers registered
 	// on forecastMux automatically inherit the 503 short-circuit when
-	// BLACKOUT_ENABLED flips on. Issue #9 registers the first real route.
+	// BLACKOUT_ENABLED flips on. ForecastCache (#11) wraps the handler with
+	// ETag + Cache-Control + 304 short-circuit per ADR-014; Blackout sits
+	// above it so a 503 blackout response is never decorated.
 	forecastMux := http.NewServeMux()
 	forecastMux.HandleFunc("GET /v1/forecast/presidential", handlers.NewPresidentialForecast(forecasts))
 	// Per ADR-007 staging, congress (v1.5) and municipal (v2) return 404
@@ -68,7 +70,7 @@ func main() {
 	// corresponding tabs. Both inherit blackout precedence from the mux.
 	forecastMux.HandleFunc("GET /v1/forecast/congress", handlers.NewCongressForecast())
 	forecastMux.HandleFunc("GET /v1/forecast/municipal/{municipality_id}", handlers.NewMunicipalForecast())
-	mux.Handle("/v1/forecast/", middleware.Blackout(forecastMux))
+	mux.Handle("/v1/forecast/", middleware.Blackout(middleware.ForecastCache(forecastMux)))
 
 	srv := &http.Server{
 		Addr:              addr,
