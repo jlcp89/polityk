@@ -36,6 +36,7 @@ func main() {
 	var dims handlers.DimensionsChecker
 	var facts handlers.FactsChecker
 	var forecasts handlers.ForecastReader
+	var healthInfo handlers.HealthInfoReader
 	if dsn := os.Getenv("DATABASE_URL"); dsn != "" {
 		db, err := sql.Open("pgx", dsn)
 		if err != nil {
@@ -50,13 +51,14 @@ func main() {
 		dims = &store.DimensionsChecker{DB: db}
 		facts = &store.FactsChecker{DB: db}
 		forecasts = &store.ForecastReader{DB: db}
+		healthInfo = &store.HealthInfo{DB: db}
 		logger.Info("db_connected")
 	} else {
 		logger.Info("db_skipped_no_dsn")
 	}
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /v1/health", handlers.NewHealth(dims, facts))
+	mux.HandleFunc("GET /v1/health", handlers.NewHealth(dims, facts, healthInfo))
 
 	// Forecast routes are blackout-gated per ADR-003. Handlers registered
 	// on forecastMux automatically inherit the 503 short-circuit when
