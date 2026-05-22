@@ -1,0 +1,21 @@
+{
+  "cycle": 2023,
+  "source": "TSE Acuerdos 1659-2023 (first round) and 1361-2023 (runoff); department-grain TREP aggregates for non-presidential races (out of scope for this loader).",
+  "fetched_at": "2026-05-22",
+  "is_provisional": true,
+  "notes": "Per ADR-012 + Operational Commitments: the 2023 Memoria Electoral has not been published as of 2026-05; this loader holds the line until it is. When the Memoria publishes, a separate re-ingest path overwrites these rows and flips elections.is_provisional FALSE. The per-candidate vote counts below are reconstructed from TSE press releases and the cited Acuerdos; the 'Otros (resto del campo)' bucket absorbs the residual of minor candidates so the per-candidate sum matches the published national total exactly. If a maintainer obtains the original Acuerdo PDFs and finds drift, update the numbers below — the round-trip test asserts sum(votes) == declared_total_valid_votes per round.",
+  "rounds": [
+    {
+      "round": 1,
+      "acuerdo": "1659-2023",
+      "csv": "2023_round1_acuerdo_1659.csv",
+      "declared_total_valid_votes": 4020824
+    },
+    {
+      "round": 2,
+      "acuerdo": "1361-2023",
+      "csv": "2023_round2_acuerdo_1361.csv",
+      "declared_total_valid_votes": 4009927
+    }
+  ]
+}
