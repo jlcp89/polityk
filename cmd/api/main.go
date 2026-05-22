@@ -19,7 +19,9 @@ import (
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 
+	"github.com/jlcp89/polityk/internal/forecastcache"
 	"github.com/jlcp89/polityk/internal/handlers"
+	"github.com/jlcp89/polityk/internal/listener"
 	"github.com/jlcp89/polityk/internal/middleware"
 	"github.com/jlcp89/polityk/internal/store"
 )
@@ -32,6 +34,9 @@ func main() {
 	if addr == "" {
 		addr = ":8080"
 	}
+
+	listenerCtx, cancelListener := context.WithCancel(context.Background())
+	defer cancelListener()
 
 	var dims handlers.DimensionsChecker
 	var facts handlers.FactsChecker
@@ -49,7 +54,20 @@ func main() {
 		}()
 		dims = &store.DimensionsChecker{DB: db}
 		facts = &store.FactsChecker{DB: db}
-		forecasts = &store.ForecastReader{DB: db}
+
+		// ADR-006: serve /v1/forecast/* from a 5-minute in-process LRU
+		// in front of the store reader; a background goroutine holds a
+		// dedicated pgx connection (separate from this http pool) on
+		// LISTEN forecast_ready and clears the cache on every NOTIFY.
+		cache := forecastcache.New(&store.ForecastReader{DB: db}, forecastcache.DefaultTTL)
+		forecasts = cache
+
+		lst := &listener.Listener{DSN: dsn, Cache: cache}
+		go func() {
+			if err := lst.Run(listenerCtx); err != nil && !errors.Is(err, context.Canceled) {
+				logger.Error("listener_failed", "err", err)
+			}
+		}()
 		logger.Info("db_connected")
 	} else {
 		logger.Info("db_skipped_no_dsn")
@@ -84,6 +102,7 @@ func main() {
 		signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 		<-sigs
 		logger.Info("shutdown_signal_received")
+		cancelListener()
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 		if err := srv.Shutdown(ctx); err != nil {
