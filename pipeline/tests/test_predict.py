@@ -392,6 +392,7 @@ def test_produce_forecast_returns_run_id_and_payload() -> None:
         posterior=posterior,
         run_id=uuid.UUID("22222222-2222-2222-2222-222222222222"),
         generated_at=datetime(2027, 7, 1, tzinfo=UTC),
+        interventions=[],
     )
     assert result.run_id == uuid.UUID("22222222-2222-2222-2222-222222222222")
     assert result.payload["run_id"] == "22222222-2222-2222-2222-222222222222"
@@ -401,7 +402,7 @@ def test_produce_forecast_returns_run_id_and_payload() -> None:
 def test_produce_forecast_generates_uuid_v4_when_unset() -> None:
     conn = _FakeConn()
     posterior = _synthetic_posterior(n_mc=10)
-    result = predict.produce_forecast(conn, posterior=posterior)
+    result = predict.produce_forecast(conn, posterior=posterior, interventions=[])
     # UUIDv4 → version field is 4.
     assert result.run_id.version == 4
 
@@ -411,7 +412,9 @@ def test_produce_forecast_writes_whatif_kind() -> None:
     is_published per ADR-006 + the partial index in migration 0006."""
     conn = _FakeConn()
     posterior = _synthetic_posterior(n_mc=10)
-    predict.produce_forecast(conn, posterior=posterior, run_kind="whatif")
+    predict.produce_forecast(
+        conn, posterior=posterior, run_kind="whatif", interventions=[]
+    )
     sql_f, params_f = conn.cur.executed[0]
     assert "INSERT INTO forecasts" in sql_f
     assert params_f[4] == "whatif"
