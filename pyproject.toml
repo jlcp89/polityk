@@ -23,6 +23,11 @@ dev = [
 sentiment = [
   "spacy>=3.7,<4.0",
 ]
+# PDF-table extractors (CID Gallup, Memoria Electoral). Kept optional so
+# the lighter scraping/scoring layers don't drag in pdfminer.
+parsers = [
+  "pdfplumber>=0.11",
+]
 
 [build-system]
 requires = ["hatchling"]
@@ -46,3 +51,8 @@ select = ["E", "F", "I", "B", "UP"]
 python_version = "3.11"
 strict = true
 files = ["pipeline"]
+exclude = [
+  # Fixture builder uses reportlab which isn't a project dep; the
+  # generated PDF is what tests consume.
+  "pipeline/parsers/fixtures/build_cid_gallup_fixture\\.py$",
+]

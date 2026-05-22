@@ -766,6 +766,9 @@ dev = [
     { name = "ruff" },
     { name = "types-openpyxl" },
 ]
+parsers = [
+    { name = "pdfplumber" },
+]
 sentiment = [
     { name = "spacy" },
 ]
@@ -776,13 +779,14 @@ requires-dist = [
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.11" },
     { name = "openpyxl", specifier = ">=3.1" },
     { name = "pdfplumber", specifier = ">=0.11" },
+    { name = "pdfplumber", marker = "extra == 'parsers'", specifier = ">=0.11" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.2" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.6" },
     { name = "spacy", marker = "extra == 'sentiment'", specifier = ">=3.7,<4.0" },
     { name = "types-openpyxl", marker = "extra == 'dev'", specifier = ">=3.1" },
 ]
-provides-extras = ["dev", "sentiment"]
+provides-extras = ["dev", "sentiment", "parsers"]
 
 [[package]]
 name = "preshed"
