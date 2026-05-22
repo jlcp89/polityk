@@ -113,6 +113,12 @@ private fun ReadyContent(payload: PresidentialPayload) {
         items(items = sorted, key = Candidate::candidateId) { candidate ->
             CandidateRow(candidate = candidate)
         }
+        item {
+            RunoffMatrixSection(
+                candidates = payload.candidates,
+                runoffMatrix = payload.runoffMatrix,
+            )
+        }
     }
 }
 
@@ -174,6 +180,7 @@ private fun CandidateRow(candidate: Candidate) {
         Spacer(modifier = Modifier.height(8.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             ProbabilityTag(
+                modifier = Modifier.testTag(runoffQualifyBadgeTag(candidate.candidateId)),
                 label = stringResource(R.string.runoff_qualifies_label),
                 value = candidate.qualifiesForRunoffProbability,
             )
@@ -191,8 +198,9 @@ private fun CandidateRow(candidate: Candidate) {
 private fun ProbabilityTag(
     label: String,
     value: Double,
+    modifier: Modifier = Modifier,
 ) {
-    Column {
+    Column(modifier = modifier) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
@@ -207,6 +215,8 @@ private fun ProbabilityTag(
 }
 
 fun candidateRowTag(candidateId: Long): String = "candidate-row-$candidateId"
+
+fun runoffQualifyBadgeTag(candidateId: Long): String = "runoff-qualify-badge-$candidateId"
 
 const val LOADING_TEST_TAG: String = "state-loading"
 const val ERROR_TEST_TAG: String = "state-error"

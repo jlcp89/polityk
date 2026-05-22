@@ -12,4 +12,7 @@
     <string name="win_round_1_label">Gana en primera elección</string>
     <string name="model_version_label">Versión del modelo</string>
     <string name="generated_at_label">Generado</string>
+    <string name="runoff_matrix_title">Posibles segundas vueltas</string>
+    <string name="runoff_matrix_empty">Aún no disponible</string>
+    <string name="runoff_matrix_row_format">%1$s vs %2$s — %3$s → %4$s gana %5$s</string>
 </resources>
