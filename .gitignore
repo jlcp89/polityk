@@ -5,7 +5,8 @@ CLAUDE.local.md
 graphify-out/
 
 # Data files — local SQLite/DuckDB, scraped PDFs, posteriors
-data/
+# Anchored at root so package-local data dirs (e.g. pipeline/seed/data/) stay tracked.
+/data/
 *.db
 *.db-wal
 *.db-shm
