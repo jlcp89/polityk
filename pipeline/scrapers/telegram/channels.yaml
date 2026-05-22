@@ -1,0 +1,19 @@
+# Public Telegram channels watched by the social scraper (ADR-015).
+#
+# `username` is the @-handle without the @ prefix; URL form is
+# `https://t.me/<username>/<message_id>`.
+# `label` is a human-readable short name used in logs and audit rows.
+#
+# Channels listed here MUST be public — the scraper does not authenticate
+# against private channels, and per ADR-015 we don't ingest private content.
+# When adding a channel, verify it is public by visiting
+# https://t.me/<username> in a browser without logging in.
+channels:
+  - username: prensalibregt
+    label: Prensa Libre
+  - username: soy502
+    label: Soy502
+  - username: emisorasunidasgt
+    label: Emisoras Unidas
+  - username: republicagt
+    label: República GT
