@@ -36,9 +36,15 @@ import logging
 import os
 import sys
 import uuid
+from collections.abc import Sequence
 from datetime import UTC, datetime
 from typing import Any
 
+from pipeline.models.interventions import (
+    Intervention,
+    apply_interventions,
+    load_active_interventions,
+)
 from pipeline.models.presidential import (
     QUANTILE_LEVELS,
     PresidentialPosterior,
@@ -135,15 +141,20 @@ def build_presidential_payload(
     methodology_url: str = METHODOLOGY_URL,
     cycle: int = 2027,
     round_: int = 1,
+    interventions_applied: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Build the ADR-014 canonical presidential payload.
 
     Everything in the returned dict — apart from ``run_id`` and
     ``generated_at`` — is a deterministic function of ``posterior``,
-    ``model_version``, ``methodology_url``, ``cycle``, and ``round_``. That
-    gives the issue-#33 idempotence guarantee: on a fixed-seed posterior
-    re-running the combiner produces the same payload bytes once those two
-    timestamp/uuid fields are factored out.
+    ``model_version``, ``methodology_url``, ``cycle``, ``round_``, and
+    ``interventions_applied``. That gives the issue-#33 idempotence guarantee:
+    on a fixed-seed posterior re-running the combiner produces the same
+    payload bytes once those two timestamp/uuid fields are factored out.
+
+    ``interventions_applied`` is the audit-trail array required by ADR-019;
+    the applier in :mod:`pipeline.models.interventions` builds it. Defaults
+    to an empty list when no interventions are active.
     """
     if round_ not in (1, 2):
         raise ValueError(f"round_ must be 1 or 2, got {round_}")
@@ -157,7 +168,7 @@ def build_presidential_payload(
         "race": {"type": RACE_TYPE_PRESIDENTIAL, "cycle": int(cycle), "round": int(round_)},
         "candidates": [_candidate_payload(c) for c in posterior.candidates],
         "runoff_matrix": [_runoff_entry_payload(e) for e in posterior.runoff_matrix],
-        "interventions_applied": [],
+        "interventions_applied": list(interventions_applied or []),
         "methodology_url": methodology_url,
     }
 
@@ -276,24 +287,48 @@ def produce_forecast(
     cycle: int = 2027,
     round_: int = 1,
     run_kind: str = "scheduled",
+    interventions: Sequence[Intervention] | None = None,
 ) -> ForecastWriteResult:
     """Build the ADR-014 payload and write both forecast rows.
 
     Generates a fresh UUIDv4 ``run_id`` and a UTC timestamp when those are
     not supplied; tests pin both for reproducibility. Caller commits.
+
+    ``interventions`` controls the ADR-019 applier behaviour:
+
+    * ``None``  — load active interventions from ``conn`` via
+      :func:`pipeline.models.interventions.load_active_interventions` and
+      apply them. This is the production CLI path.
+    * ``[]``    — skip the load entirely (no DB SELECT), no transformation.
+      Tests use this to keep the fake-conn path schema-free.
+    * non-empty — use the provided interventions directly; no DB read.
+
+    The ``forecasts.payload`` written downstream carries the resolved
+    ``interventions_applied`` array regardless of which branch ran.
     """
     rid = run_id if run_id is not None else uuid.uuid4()
     gen_at = generated_at if generated_at is not None else datetime.now(UTC)
+
+    if interventions is None:
+        active = load_active_interventions(conn, at=gen_at)
+    else:
+        active = list(interventions)
+
+    transformed_posterior, interventions_applied = apply_interventions(
+        posterior, active
+    )
+
     payload = build_presidential_payload(
-        posterior,
+        transformed_posterior,
         run_id=rid,
         generated_at=gen_at,
         model_version=model_version,
         methodology_url=methodology_url,
         cycle=cycle,
         round_=round_,
+        interventions_applied=interventions_applied,
     )
-    sample_array = posterior_sample_array(posterior)
+    sample_array = posterior_sample_array(transformed_posterior)
     write_forecast(
         conn,
         run_id=rid,
