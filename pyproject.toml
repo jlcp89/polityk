@@ -13,6 +13,12 @@ dev = [
   "ruff>=0.6",
   "mypy>=1.11",
 ]
+# Sentiment NER stack — heavy, kept optional. Install with `uv sync --extra sentiment`
+# and `python -m spacy download es_core_news_sm`. The entity resolver runs
+# gazetteer-only when these aren't available.
+sentiment = [
+  "spacy>=3.7,<4.0",
+]
 
 [build-system]
 requires = ["hatchling"]
