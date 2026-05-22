@@ -261,6 +261,7 @@ def parse_presidential_table(
     *,
     round_number: int,
     schema: TableSchema = PRESIDENTIAL_SCHEMA,
+    cycle: int = CYCLE,
 ) -> tuple[PresidentialRow, ...]:
     """Convert raw presidential table rows to typed :class:`PresidentialRow`.
 
@@ -284,7 +285,7 @@ def parse_presidential_table(
         )
         out.append(
             PresidentialRow(
-                cycle=CYCLE,
+                cycle=cycle,
                 round_number=round_number,
                 candidate_name=str(row["candidate"]).strip(),
                 geography_level=str(row["geography_level"]).strip(),
@@ -309,6 +310,7 @@ def parse_congress_table(
     *,
     chamber: Chamber,
     schema: TableSchema | None = None,
+    cycle: int = CYCLE,
 ) -> tuple[CongressRow, ...]:
     """Convert raw congress rows to typed :class:`CongressRow`.
 
@@ -338,7 +340,7 @@ def parse_congress_table(
             district_code = "GT"
         out.append(
             CongressRow(
-                cycle=CYCLE,
+                cycle=cycle,
                 chamber=chamber,
                 district_code=district_code,
                 party_name=party,
@@ -353,6 +355,7 @@ def parse_municipal_table(
     rows: Sequence[RawRow],
     *,
     schema: TableSchema = MUNICIPAL_SCHEMA,
+    cycle: int = CYCLE,
 ) -> tuple[MunicipalRow, ...]:
     """Convert raw alcalde rows to typed :class:`MunicipalRow`.
 
@@ -379,7 +382,7 @@ def parse_municipal_table(
                 f"{schema.label}: row {muni}/{party}: alcalde_won not boolean-like"
             )
         m = MunicipalRow(
-            cycle=CYCLE,
+            cycle=cycle,
             municipality_code=muni,
             party_name=party,
             alcalde_votes=votes,
@@ -626,19 +629,24 @@ def extract_from_pdf(
     congress_nacional: Sequence[RawRow] | None = None,
     parlacen: Sequence[RawRow] | None = None,
     municipal: Sequence[RawRow] | None = None,
+    cycle: int = CYCLE,
 ) -> ExtractionResult:
-    """Run the full Memoria 2019 extraction.
+    """Run the full Memoria extraction.
 
     The keyword arguments let callers (and tests) inject already-extracted
     raw rows for each table. When all are ``None``, the function reads
     ``path`` with pdfplumber and tries to discover the tables itself — but
     raises ``TableDriftError`` rather than silently emitting empty results.
 
+    ``cycle`` defaults to 2019 but per-cycle wrappers (e.g.
+    :mod:`pipeline.parsers.memoria_2007`) pass their own value so the
+    typed rows are stamped with the correct election year.
+
     Idempotency: calling twice on the same PDF returns equal ``ExtractionResult``
     objects (``==``-equal, and identical ``fingerprint()``).
     """
     if not path.exists():
-        raise FileNotFoundError(f"Memoria 2019 PDF not found: {path}")
+        raise FileNotFoundError(f"Memoria PDF not found: {path}")
 
     sha = _sha256_of_file(path)
 
@@ -654,9 +662,9 @@ def extract_from_pdf(
         )
     )
     if not any_injected:
-        # Live-PDF path: read every table on every page. The real Memoria
-        # 2019 dispatch (header-text -> schema) lives in issue #21's shared
-        # helpers; for now any missing race-type-table is a typed drift.
+        # Live-PDF path: read every table on every page. The real per-cycle
+        # dispatch (header-text -> schema) varies by Memoria; in the absence
+        # of a dispatch map we fail loud rather than emit empty results.
         try:
             raw_tables = read_raw_tables_pdfplumber(path)
         except Exception as exc:  # pdfminer / pdfplumber bubble many shapes
@@ -668,8 +676,6 @@ def extract_from_pdf(
                 "No tables extractable from PDF; layout has drifted (or "
                 "pdfplumber returned nothing — try the camelot fallback)"
             )
-        # Without an injected dispatch map we cannot safely classify the
-        # raw tables. Fail loud rather than silently emit empty results.
         raise TableDriftError(
             f"PDF parsed but no race-type dispatch supplied "
             f"({len(raw_tables)} raw tables found at {path})"
@@ -678,28 +684,38 @@ def extract_from_pdf(
     presidential: list[PresidentialRow] = []
     if presidential_round_1 is not None:
         presidential.extend(
-            parse_presidential_table(presidential_round_1, round_number=1)
+            parse_presidential_table(
+                presidential_round_1, round_number=1, cycle=cycle
+            )
         )
     if presidential_round_2 is not None:
         presidential.extend(
-            parse_presidential_table(presidential_round_2, round_number=2)
+            parse_presidential_table(
+                presidential_round_2, round_number=2, cycle=cycle
+            )
         )
 
     congress: list[CongressRow] = []
     if congress_distrital is not None:
         congress.extend(
-            parse_congress_table(congress_distrital, chamber="congress_distrital")
+            parse_congress_table(
+                congress_distrital, chamber="congress_distrital", cycle=cycle
+            )
         )
     if congress_nacional is not None:
         congress.extend(
-            parse_congress_table(congress_nacional, chamber="congress_nacional")
+            parse_congress_table(
+                congress_nacional, chamber="congress_nacional", cycle=cycle
+            )
         )
     if parlacen is not None:
-        congress.extend(parse_congress_table(parlacen, chamber="parlacen"))
+        congress.extend(
+            parse_congress_table(parlacen, chamber="parlacen", cycle=cycle)
+        )
 
     municipal_rows: tuple[MunicipalRow, ...] = ()
     if municipal is not None:
-        municipal_rows = parse_municipal_table(municipal)
+        municipal_rows = parse_municipal_table(municipal, cycle=cycle)
 
     return ExtractionResult(
         presidential=tuple(presidential),
