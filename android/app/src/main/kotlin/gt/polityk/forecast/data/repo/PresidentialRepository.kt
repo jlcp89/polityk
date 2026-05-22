@@ -1,6 +1,7 @@
 package gt.polityk.forecast.data.repo
 
 import com.squareup.moshi.JsonAdapter
+import gt.polityk.forecast.data.api.BlackoutException
 import gt.polityk.forecast.data.api.PolitykApi
 import gt.polityk.forecast.data.api.PresidentialPayload
 import gt.polityk.forecast.data.db.ForecastCacheDao
@@ -12,9 +13,11 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Fetches the presidential forecast and writes the raw payload into the Room
- * cache for later freshness checks (issue #42). This issue scaffolds cache
- * **writes only** — there is no read-through here. Tests assert the write side.
+ * Fetches the presidential forecast, writes the raw payload into the Room
+ * cache for later freshness checks (issue #42), and on a Blackout response
+ * (HTTP 503, surfaced as [BlackoutException] by the interceptor) wipes the
+ * cached payload for this endpoint and rethrows so the ViewModel can emit
+ * the Blackout splash state.
  */
 @Singleton
 class PresidentialRepository
@@ -26,7 +29,13 @@ class PresidentialRepository
         private val clock: Clock,
     ) {
         suspend fun fetch(): PresidentialPayload {
-            val payload = api.getPresidential()
+            val payload =
+                try {
+                    api.getPresidential()
+                } catch (blackout: BlackoutException) {
+                    runCatching { cacheDao.deleteByEndpoint(PRESIDENTIAL_ENDPOINT_KEY) }
+                    throw blackout
+                }
             runCatching {
                 cacheDao.upsert(
                     ForecastCacheEntity(
@@ -39,6 +48,21 @@ class PresidentialRepository
                 )
             }
             return payload
+        }
+
+        /**
+         * Read the cached entry for the presidential endpoint, honouring
+         * `cache_invalid_until` as a forced expiry per issue #43 AC. A row
+         * whose `cacheInvalidUntilEpochMs <= now` is treated as missing
+         * (returns `null`) and the caller must force a fresh fetch. Rows
+         * with a null `cacheInvalidUntilEpochMs` are never forced-expired
+         * by this helper — the freshness banner state machine in #42
+         * applies its own age buckets.
+         */
+        suspend fun readCacheIfValid(): ForecastCacheEntity? {
+            val entry = cacheDao.get(PRESIDENTIAL_ENDPOINT_KEY) ?: return null
+            val invalidUntil = entry.cacheInvalidUntilEpochMs ?: return entry
+            return if (invalidUntil <= clock.millis()) null else entry
         }
 
         private fun parseIsoToEpochMs(iso: String): Long? =

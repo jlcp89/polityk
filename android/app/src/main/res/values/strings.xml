@@ -32,4 +32,8 @@
     <string name="methodology_pollster_table_header">Sesgo medio · σ · n</string>
     <string name="methodology_open_long_form">Leer el documento</string>
     <string name="methodology_long_form_url_label">URL</string>
+    <string name="blackout_title">Silencio Electoral</string>
+    <string name="blackout_body">Por mandato legal, los pronósticos están suspendidos durante el silencio electoral.</string>
+    <string name="blackout_legal_reference">Expediente 1699-2018 — Corte de Constitucionalidad de Guatemala</string>
+    <string name="blackout_resume_label">Los pronósticos se reanudan</string>
 </resources>
