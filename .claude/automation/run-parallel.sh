@@ -80,6 +80,7 @@ ROUND=0
 cleanup() {
     local signal="${1:-EXIT}"
     local delete_branches="${2:-0}"
+    stop_sweeper
     {
         echo "=== cleanup ($signal) at $(date -Iseconds) ==="
         echo "active workers: ${#PID_TO_ISSUE[@]}"
@@ -115,6 +116,66 @@ trap 'cleanup INT'  INT
 trap 'cleanup TERM' TERM
 trap 'cleanup TSTP 1' TSTP   # Ctrl+Z: full teardown + branch delete for clean restart
 trap 'cleanup EXIT' EXIT
+# SIGHUP can fire if the terminal that launched the supervisor closes.
+# Ignore it so the supervisor survives a disconnected SSH session and so an
+# attached worker can't drag the supervisor down with it. (Workers handle
+# their own signal lifecycle.)
+trap '' HUP
+
+# ── Supervisor watchdog (background sweeper) ────────────────────────────────
+# Periodically scans tracked workers; if a worker's worker-N.log hasn't been
+# written to in WORKER_STALE_TIMEOUT seconds, SIGTERM/KILL it. Defense in
+# depth against the worker bash itself wedging (in addition to the
+# run-loop.sh claude-level watchdog).
+WORKER_STALE_TIMEOUT="${WORKER_STALE_TIMEOUT:-600}"   # 10 min default
+SWEEPER_INTERVAL="${SWEEPER_INTERVAL:-60}"
+SWEEPER_PIDS_FILE="$WORKTREE_ROOT/.tracked-pids"
+SWEEPER_PID=""
+
+start_sweeper() {
+    (
+        # Inherit SIGHUP-ignore from parent.
+        while sleep "$SWEEPER_INTERVAL"; do
+            [ -f "$SWEEPER_PIDS_FILE" ] || continue
+            now="$(date +%s)"
+            while IFS=$'\t' read -r spid sissue slog; do
+                [ -z "$spid" ] && continue
+                kill -0 "$spid" 2>/dev/null || continue
+                [ -f "$slog" ] || continue
+                mtime="$(stat -c %Y "$slog" 2>/dev/null || echo "$now")"
+                stale=$((now - mtime))
+                if [ "$stale" -gt "$WORKER_STALE_TIMEOUT" ]; then
+                    echo "supervisor: [$(date +%T)] SWEEPER worker pid=$spid (#$sissue) idle ${stale}s > ${WORKER_STALE_TIMEOUT}s — terminating" \
+                        >> "$SUPERVISOR_LOG"
+                    kill -TERM "$spid" 2>/dev/null || true
+                    sleep 10
+                    kill -KILL "$spid" 2>/dev/null || true
+                fi
+            done < "$SWEEPER_PIDS_FILE"
+        done
+    ) &
+    SWEEPER_PID=$!
+    echo "supervisor: sweeper started pid=$SWEEPER_PID (stale_after=${WORKER_STALE_TIMEOUT}s tick=${SWEEPER_INTERVAL}s)" \
+        | tee -a "$SUPERVISOR_LOG"
+}
+
+refresh_sweeper_state() {
+    # Atomically rewrite the tracked-PIDs file. Sweeper reads it each tick.
+    local tmp="${SWEEPER_PIDS_FILE}.tmp.$$"
+    : > "$tmp"
+    for refresh_pid in "${!PID_TO_ISSUE[@]}"; do
+        refresh_issue="${PID_TO_ISSUE[$refresh_pid]}"
+        printf '%s\t%s\t%s\n' "$refresh_pid" "$refresh_issue" \
+            "$WORKTREE_ROOT/worker-${refresh_issue}.log" >> "$tmp"
+    done
+    mv "$tmp" "$SWEEPER_PIDS_FILE"
+}
+
+stop_sweeper() {
+    [ -n "${SWEEPER_PID:-}" ] || return 0
+    kill "$SWEEPER_PID" 2>/dev/null || true
+    wait "$SWEEPER_PID" 2>/dev/null || true
+}
 
 # ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -199,6 +260,7 @@ dispatch_worker() {
     ISSUE_TO_WT[$issue_num]="$wt"
 
     echo "supervisor: [$(date +%T)] dispatched #$issue_num → pid=$pid | log: worker-$issue_num.log" | tee -a "$SUPERVISOR_LOG"
+    refresh_sweeper_state
 }
 
 resolve_conflicts_with_claude() {
@@ -404,9 +466,12 @@ reap_one() {
     unset "PID_TO_ISSUE[$pid]"
     unset "ISSUE_TO_PID[$issue_num]"
     unset "ISSUE_TO_WT[$issue_num]"
+    refresh_sweeper_state
 }
 
 # ── Main supervisor loop ────────────────────────────────────────────────────
+start_sweeper
+
 while :; do
     ROUND=$((ROUND + 1))
     if [ "$MAX_ROUNDS" -gt 0 ] && [ "$ROUND" -gt "$MAX_ROUNDS" ]; then

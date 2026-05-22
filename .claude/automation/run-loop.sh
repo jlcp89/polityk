@@ -122,17 +122,70 @@ while :; do
 
     # Run claude with stream-json so we can parse the final result deterministically.
     # Live streaming text goes to stdout via jq; raw stream is preserved in iter log.
+    #
+    # Watchdog (background process) enforces two timeouts on the claude child:
+    #   1. CLAUDE_HARD_TIMEOUT (default 90 min): absolute wall-clock cap.
+    #   2. CLAUDE_RESULT_GRACE (default 120 s): time allowed after the final
+    #      stream-json `{"type":"result"}` event lands before SIGTERM. Catches
+    #      the known "`claude --print --output-format stream-json` doesn't
+    #      exit after emitting the final result" hang that wedges the worker
+    #      indefinitely.
+    # The claude process is identified by a unique marker injected into the
+    # prompt — pgrep matches it precisely without racing on process-tree walks.
+    WATCHDOG_MARKER="POLITYK_AFK_ITER_${ITER}_$$_$(date +%s%N)"
+    WATCHDOG_PROMPT="${prompt}
+
+<!-- ${WATCHDOG_MARKER} -->"
+
+    (
+        # Watchdog subshell. Exits when claude is gone OR timeout fires.
+        wd_start="$(date +%s)"
+        wd_result_at=""
+        wd_hard="${CLAUDE_HARD_TIMEOUT:-5400}"
+        wd_grace="${CLAUDE_RESULT_GRACE:-120}"
+        while sleep 5; do
+            wd_cpid="$(pgrep -f "$WATCHDOG_MARKER" 2>/dev/null | head -1)"
+            if [ -z "$wd_cpid" ]; then break; fi
+            wd_ts="$(date +%s)"
+            if [ $((wd_ts - wd_start)) -gt "$wd_hard" ]; then
+                echo "[watchdog] hard timeout (${wd_hard}s) — terminating claude pid=$wd_cpid" \
+                    | tee -a "$SUMMARY" >&2
+                kill -TERM "$wd_cpid" 2>/dev/null || true
+                sleep 10
+                kill -KILL "$wd_cpid" 2>/dev/null || true
+                break
+            fi
+            if [ -z "$wd_result_at" ] \
+               && jq -e 'select(.type == "result")' "$ITER_LOG" >/dev/null 2>&1; then
+                wd_result_at="$wd_ts"
+            fi
+            if [ -n "$wd_result_at" ] && [ $((wd_ts - wd_result_at)) -gt "$wd_grace" ]; then
+                echo "[watchdog] final result + ${wd_grace}s grace elapsed — terminating claude pid=$wd_cpid" \
+                    | tee -a "$SUMMARY" >&2
+                kill -TERM "$wd_cpid" 2>/dev/null || true
+                sleep 10
+                kill -KILL "$wd_cpid" 2>/dev/null || true
+                break
+            fi
+        done
+    ) &
+    WATCHDOG_PID=$!
+
     set +e
     claude --dangerously-skip-permissions \
            --print \
            --verbose \
            --output-format stream-json \
            --include-partial-messages \
-           "$prompt" \
+           "$WATCHDOG_PROMPT" \
         | tee "$ITER_LOG" \
         | jq --unbuffered -rj "$STREAM_TEXT" 2>/dev/null
     claude_rc="${PIPESTATUS[0]}"
     set -e
+
+    # Reap the watchdog (no-op if it already exited).
+    kill "$WATCHDOG_PID" 2>/dev/null || true
+    wait "$WATCHDOG_PID" 2>/dev/null || true
 
     # Extract final result (deterministic — not grepping prose).
     result="$(jq -r "$FINAL_RESULT" "$ITER_LOG" 2>/dev/null || echo '')"
